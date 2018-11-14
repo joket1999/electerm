@@ -4,8 +4,8 @@
 
 const {resolve} = require('path')
 const {exec, echo} = require('shelljs')
-const dir = resolve(__dirname, '../../electerm-resource/build')
-const src = resolve(__dirname, '../../electerm-resource/static/images/electerm-grey-1024x1024.png')
+const dir = resolve(__dirname, '../app/build')
+const src = resolve(__dirname, '../app/imgs/heduo-grey-1024x1024.png')
 const bin = './node_modules/.bin'
 
 

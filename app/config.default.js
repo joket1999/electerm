@@ -7,8 +7,8 @@ const appPath = require('./lib/app-path')
 module.exports = function() {
   let override = {}
   let userConfig = {}
-  let configPath = resolve(appPath, 'electerm-config.js')
-  let userConfigPath = resolve(appPath, 'electerm-user-config.json')
+  let configPath = resolve(appPath, 'heduo-config.js')
+  let userConfigPath = resolve(appPath, 'heduo-user-config.json')
 
   try {
     override = require(configPath)

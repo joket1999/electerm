@@ -6,7 +6,7 @@ const {writeFileSync, readFileSync} = require('fs')
 const _ = require('lodash')
 const {resolve} = require('path')
 const appPath = require('./app-path')
-const savePath = resolve(appPath, 'electerm-localstorage.json')
+const savePath = resolve(appPath, 'heduo-localstorage.json')
 const copy = require('json-deep-copy')
 
 let cache = {}
@@ -17,7 +17,7 @@ const get = (key) => {
     cache = db
     return db[key]
   } catch(e) {
-    console.log('no electerm-localstorage.json, but it is ok.')
+    console.log('no heduo-localstorage.json, but it is ok.')
     return null
   }
 }

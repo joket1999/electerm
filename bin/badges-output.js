@@ -72,12 +72,12 @@ const list = [
 
 // Configuration for the badges
 const config = {
-  npmPackageName: 'electerm',
+  npmPackageName: 'heduo',
   // saucelabsUsername: 'bevry',
   // saucelabsAuthToken: '123',
   // codeshipProjectUUID: '123',
   // codeshipProjectID: '123',
-  githubSlug: 'electerm/electerm'
+  githubSlug: 'heduo/heduo'
   // nodeicoQueryString: {
   //   downloads: true,
   //   compact: true,

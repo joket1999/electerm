@@ -7,7 +7,7 @@ const fs = require('fs')
 const {resolve} = require('path')
 const appPath = require('./app-path')
 exports.userConfig = {}
-const userConfigPath = resolve(appPath, 'electerm-user-config.json')
+const userConfigPath = resolve(appPath, 'heduo-user-config.json')
 
 try {
   exports.userConfig = require(userConfigPath)

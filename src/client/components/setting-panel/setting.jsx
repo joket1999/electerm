@@ -271,8 +271,8 @@ export default class Setting extends React.PureComponent {
             }
           </Select>
         </div>
-        <div className="pd1b">{e('language')}</div>
-        <div className="pd2b">
+        {/* <div className="pd1b">{e('language')}</div> */}
+        {/* <div className="pd2b">
           <Select
             onChange={this.onChangeLang}
             value={language}
@@ -287,8 +287,8 @@ export default class Setting extends React.PureComponent {
               })
             }
           </Select>
-        </div>
-        {this.renderLanguageChangeTip()}
+        </div> */}
+        {/* {this.renderLanguageChangeTip()} */}
         <div className="pd1y font16 bold">
           <Icon type="code" theme="outlined" className="mg1r" />
           {s('terminal')} {e('settings')}

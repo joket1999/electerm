@@ -12,7 +12,7 @@ import {
 } from 'antd'
 import createName from '../../common/create-title'
 import copy from 'json-deep-copy'
-import MenuBtn from './menu-btn'
+// import MenuBtn from './menu-btn'
 
 const {Option} = Select
 const {prefix, getGlobal} = window
@@ -158,7 +158,7 @@ export default memo(props => {
   return (
     <div className="btns relative borderb fix">
       <div className="left-btns relative">
-        <MenuBtn />
+        {/* <MenuBtn /> */}
         <Button
           className="mg1r iblock"
           type="ghost"
@@ -189,12 +189,12 @@ export default memo(props => {
             onClick={onEditBookmark}
           />
         </Tooltip>
-        <Icon
+        {/* <Icon
           type="picture"
           className="font16 mg2l iblock pointer control-icon"
           onClick={openTerminalThemes}
           title={t('terminalThemes')}
-        />
+        /> */}
         <Icon
           className="mg2l iblock pointer font16 control-icon"
           type="setting"

@@ -5,7 +5,7 @@ const lang = {
 
   //app desc
   app: {
-    desc: 'electerm是一个terminal/ssh/sftp客户端(支持linux, mac, win), 基于electron/node-pty/xterm/antd等组件',
+    desc: '和多是一个基于electerm二次开发的terminal/ssh/sftp客户端(支持linux, mac, win), 依赖electron/node-pty/xterm/antd等组件',
     isRunning: '运行中',
     press: '按',
     toShow: '显示'

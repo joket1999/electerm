@@ -7,7 +7,7 @@ import copy from 'json-deep-copy'
 import ContextMenu from '../common/context-menu'
 import FileInfoModal from '../sftp/file-props-modal'
 import FileModeModal from '../sftp/file-mode-modal'
-import UpdateCheck from './update-check'
+// import UpdateCheck from './update-check'
 import {notification} from 'antd'
 import openInfoModal from '../control/info-modal'
 import * as terminalThemes from '../../common/terminal-theme'
@@ -76,7 +76,7 @@ export default class Index extends React.Component {
     this.onResize()
     window._require('electron')
       .ipcRenderer
-      .on('checkupdate', this.onCheckUpdate)
+    //   .on('checkupdate', this.onCheckUpdate)
       .on('open-about', this.openAbout)
       .on('toggle-control', this.toggleControl)
     document.addEventListener('drop', function(e) {
@@ -207,8 +207,8 @@ export default class Index extends React.Component {
 
   openAbout = () => {
     openInfoModal({
-      onCheckUpdatingo: this.nCheckUpdating,
-      onCheckUpdate: this.onCheckUpdate
+    //   onCheckUpdatingo: this.nCheckUpdating,
+    //   onCheckUpdate: this.onCheckUpdate
     })
   }
 
@@ -249,14 +249,14 @@ export default class Index extends React.Component {
     })
   }
 
-  onCheckUpdate = () => {
-    if (this.state.onCheckUpdating) {
-      return
-    }
-    this.setState({
-      shouldCheckUpdate: +new Date()
-    })
-  }
+//   onCheckUpdate = () => {
+//     if (this.state.onCheckUpdating) {
+//       return
+//     }
+//     this.setState({
+//       shouldCheckUpdate: +new Date()
+//     })
+//   }
 
   openContextMenu = (contextMenuProps) => {
     this.setState({
@@ -479,7 +479,7 @@ export default class Index extends React.Component {
         'addTransferHistory',
         'onError', 'openContextMenu',
         'modifyLs', 'addItem', 'editItem', 'delItem',
-        'onCheckUpdate', 'openAbout',
+        'openAbout',
         'setTheme', 'addTheme', 'editTheme', 'delTheme',
         'addBookmarkGroup',
         'editBookmarkGroup',
@@ -504,10 +504,10 @@ export default class Index extends React.Component {
           {...textEditorProps}
           modifier={this.modifier}
         />
-        <UpdateCheck
+        {/* <UpdateCheck
           modifier={this.modifier}
           shouldCheckUpdate={shouldCheckUpdate}
-        />
+        /> */}
         <ContextMenu
           {...contextMenuProps}
           visible={contextMenuVisible}

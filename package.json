@@ -1,9 +1,9 @@
 {
-  "name": "electerm",
-  "version": "0.25.21",
+  "name": "heduo",
+  "version": "0.0.1",
   "description": "Terminal/ssh/sftp client(linux, mac, win) based on electron/node-pty/xterm and other libs",
   "main": "dev-app.js",
-  "bin": "npm/electerm",
+  "bin": "npm/heduo",
   "scripts": {
     "app": "cd app && NODE_ENV=development ../node_modules/.bin/electron ./app",
     "build": "./node_modules/.bin/cross-env NODE_ENV=production ./node_modules/.bin/webpack --progress",
@@ -23,20 +23,6 @@
     "test": "./node_modules/.bin/mocha test/e2e/*.js",
     "pre-test": "npm run compile && npm run prepare-file"
   },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/electerm/electerm.git"
-  },
-  "author": {
-    "name": "ZHAO Xudong",
-    "email": "zxdong@gmail.com",
-    "url": "https://html5beta.com"
-  },
-  "bugs": {
-    "url": "https://github.com/electerm/electerm/issues"
-  },
-  "homepage": "https://electerm.html5beta.com",
   "engines": {
     "node": ">=8.9.1"
   },

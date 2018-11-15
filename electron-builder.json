@@ -1,5 +1,5 @@
 {
-  "appId": "org.electerm.electerm",
+  "appId": "org.heduo.heduo",
   "directories": {
     "app": "work/app",
     "output": "dist"
@@ -7,12 +7,12 @@
   "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
   "win": {
     "target": ["tar.gz"],
-    "icon": "node_modules/electerm-resource/build/icons.ico"
+    "icon": "app/build/icons.ico"
   },
   "mac": {
     "category": "public.app-category.developer-tools",
     "target": ["dmg"],
-    "icon": "node_modules/electerm-resource/build/icons.icns"
+    "icon": "app/build/icons.icns"
   },
   "dmg": {
     "contents": [
@@ -30,7 +30,7 @@
   },
   "linux": {
     "category": "Development",
-    "icon": "node_modules/electerm-resource/res/imgs",
+    "icon": "app/imgs",
     "target": [
       "rpm",
       "deb",

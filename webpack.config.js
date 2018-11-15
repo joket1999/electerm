@@ -53,7 +53,7 @@ const stylusSettingPlugin =  new webpack.LoaderOptionsPlugin({
 var config = {
   mode: 'development',
   entry: {
-    electerm: './src/client/entry/index.jsx',
+    heduo: './src/client/entry/index.jsx',
     basic: './src/client/entry/basic.jsx',
     index: './src/views/index.pug'
   },

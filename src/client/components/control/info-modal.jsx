@@ -5,8 +5,6 @@
 import {Modal, Tabs, Tag} from 'antd'
 import _ from 'lodash'
 
-let logoPath1 = require('node_modules/electerm-resource/res/imgs/electerm-round-128x128.png').replace(/^\//, '')
-let logoPath2 = require('node_modules/electerm-resource/res/imgs/electerm.png').replace(/^\//, '')
 const {prefix, lang} = window
 const e = prefix('control')
 const m = prefix('menu')
@@ -36,10 +34,6 @@ export default function() {
       <div className="about-wrap">
         <Tabs defaultActiveKey="1">
           <TabPane tab={m('about')} key="1">
-            {/* <div className="pd2y aligncenter">
-              <img src={logoPath1} className={`iblock mwm-100 ${cls1}`} />
-              <img src={logoPath2} className={`iblock mwm-100 ${cls2}`} />
-            </div> */}
             <h1 className="mg2b font50">
               <span className="iblock mg1r">{name}</span>
               <Tag color="#08c">{version}</Tag>

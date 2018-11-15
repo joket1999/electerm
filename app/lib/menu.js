@@ -85,16 +85,16 @@ const template = [
         role: 'forcereload',
         label: e('forcereload')
       },
-      {
-        role: 'toggledevtools',
-        label: e('toggledevtools')
-      },
-      {
-        label: e('toggleControl'),
-        click() {
-          require('./win').win.webContents.send('toggle-control', null)
-        }
-      },
+    //   {
+    //     role: 'toggledevtools',
+    //     label: e('toggledevtools')
+    //   },
+    //   {
+    //     label: e('toggleControl'),
+    //     click() {
+    //       require('./win').win.webContents.send('toggle-control', null)
+    //     }
+    //   },
       {
         type: 'separator'
       },
@@ -149,39 +149,6 @@ const template = [
         click() {
           require('./win').win.webContents.send('open-about', null)
         }
-      },
-      {
-        label: e('checkUpdate'),
-        click() {
-          require('./win').win.webContents.send('checkupdate', null)
-        }
-      },
-      {
-        label: e('reportIssue'),
-        click() {
-          shell
-            .openExternal('https://github.com/electerm/electerm/issues/new')
-        }
-      },
-      {
-        label: 'github',
-        click() {
-          shell
-            .openExternal('https://github.com/electerm/electerm')
-        }
-      },
-      {
-        label: e('homepage'),
-        click() {
-          shell
-            .openExternal(packInfo.homepage)
-        }
-      },
-      {
-        label: e('toggledevtools'),
-        click() {
-          require('./win').win.webContents.openDevTools()
-        }
       }
     ]
   }
@@ -220,22 +187,22 @@ if (process.platform === 'darwin') {
     ]
   })
 
-  // Edit menu
-  template[1].submenu.push({
-    type: 'separator'
-  }, {
-    label: 'Speech',
-    submenu: [
-      {
-        role: 'startspeaking',
-        label: e('startspeaking')
-      },
-      {
-        role: 'stopspeaking',
-        label: e('stopspeaking')
-      }
-    ]
-  })
+//   // Edit menu
+//   template[1].submenu.push({
+//     type: 'separator'
+//   }, {
+//     label: 'Speech',
+//     submenu: [
+//       {
+//         role: 'startspeaking',
+//         label: e('startspeaking')
+//       },
+//       {
+//         role: 'stopspeaking',
+//         label: e('stopspeaking')
+//       }
+//     ]
+//   })
 
   // Window menu
   template[3].submenu = [

@@ -21,7 +21,9 @@ class Sftp {
   connect(config) {
     let {client} = this
     let confs = Object.assign(
-      {},
+      {
+        tryKeyboard: true
+      },
       {
         readyTimeout: _.get(config, 'sshReadyTimeout'),
         keepaliveInterval: _.get(config, 'keepaliveInterval'),

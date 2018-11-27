@@ -50,7 +50,9 @@ class Terminal {
     return new Promise((resolve, reject) => {
       const conn = new Client()
       let opts = Object.assign(
-        {},
+        {
+          tryKeyboard: true
+        },
         {
           readyTimeout: _.get(initOptions, 'sshReadyTimeout'),
           keepaliveInterval: _.get(initOptions, 'keepaliveInterval'),

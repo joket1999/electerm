@@ -13,8 +13,9 @@ export default function(props) {
     return null
   }
   let submit = () => {
-    if (password.length < 6) {
-      return message.error('password length must > 6')
+    let len = password.length
+    if (len < 6 || len > 20) {
+      return message.error('password length must >= 6 and < 20')
     }
     window._require('electron')
       .ipcRenderer

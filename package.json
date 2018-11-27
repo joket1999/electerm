@@ -1,6 +1,6 @@
 {
   "name": "electerm",
-  "version": "0.25.38",
+  "version": "0.25.39",
   "description": "Terminal/ssh/sftp client(linux, mac, win) based on electron/node-pty/xterm and other libs",
   "main": "dev-app.js",
   "bin": "npm/electerm",
@@ -124,8 +124,8 @@
     "node-pty": "0.7.8",
     "os-locale": "3.0.1",
     "phin": "2.9.2",
-    "react": "16.6.0",
-    "react-dom": "16.6.0",
+    "react": "16.7.0-alpha.2",
+    "react-dom": "16.7.0-alpha.2",
     "recursive-assign": "0.2.0",
     "shortid": "2.2.13",
     "socks": "2.2.1",

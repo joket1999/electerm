@@ -6,6 +6,7 @@ let {Client} = require('ssh2')
 const proxySock = require('./socks')
 const _ = require('lodash')
 const {readRemoteFile, writeRemoteFile} = require('./sftp-file')
+const {onChangePassword, onKeyboardInteractive} = require('./ssh2-event-handler')
 
 class Sftp {
 
@@ -36,17 +37,21 @@ class Sftp {
           delete confs.proxy
           confs.sock = info.socket
         }
-        client.on('ready', () => {
-          client.sftp((err, sftp) => {
-            if (err) {
-              reject(err)
-            }
-            this.sftp = sftp
-            resolve('')
+        client
+          .on('change password', onChangePassword)
+          .on('keyboard-interactive', onKeyboardInteractive)
+          .on('ready', () => {
+            client.sftp((err, sftp) => {
+              if (err) {
+                reject(err)
+              }
+              this.sftp = sftp
+              resolve('')
+            })
           })
-        }).on('error', (err) => {
-          reject(err)
-        }).connect(confs)
+          .on('error', (err) => {
+            reject(err)
+          }).connect(confs)
       }
       if (
         config.proxy &&

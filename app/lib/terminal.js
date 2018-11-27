@@ -7,6 +7,7 @@ const proxySock = require('./socks')
 const _ = require('lodash')
 const {generate} = require('shortid')
 const {resolve} = require('path')
+const {onChangePassword, onKeyboardInteractive} = require('./ssh2-event-handler')
 
 class Terminal {
 
@@ -73,27 +74,31 @@ class Terminal {
           delete opts.port
           opts.sock = info.socket
         }
-        conn.on('ready', () => {
-          if (isTest) {
-            conn.end()
-            return resolve(true)
-          }
-          conn.shell(
-            _.pick(initOptions, ['rows', 'cols', 'term']),
-            // {
-            //   env: process.env
-            // },
-            (err, channel) => {
-              if (err) {
-                return reject(err)
-              }
-              this.channel = channel
-              resolve(true)
+        conn
+          .on('change password', onChangePassword)
+          .on('keyboard-interactive', onKeyboardInteractive)
+          .on('ready', () => {
+            if (isTest) {
+              conn.end()
+              return resolve(true)
             }
-          )
-        }).on('error', err => {
-          reject(err)
-        }).connect(opts)
+            conn.shell(
+              _.pick(initOptions, ['rows', 'cols', 'term']),
+              // {
+              //   env: process.env
+              // },
+              (err, channel) => {
+                if (err) {
+                  return reject(err)
+                }
+                this.channel = channel
+                resolve(true)
+              }
+            )
+          })
+          .on('error', err => {
+            reject(err)
+          }).connect(opts)
       }
       if (
         initOptions.proxy &&

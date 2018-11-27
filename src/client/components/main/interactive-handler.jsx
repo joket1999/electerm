@@ -3,15 +3,15 @@
  */
 
 import {useState} from 'react'
-import {Icon, Modal, message} from 'antd'
+import {Icon, Modal} from 'antd'
 import InputFocus from '../common/input-auto-focus'
 
 export default function(props) {
   let [inputs, setInputs] = useState([])
   let {
     name,
-    instructions,
-    prompts,
+    // instructions,
+    // prompts,
     visible,
     modifier,
     id
@@ -58,15 +58,15 @@ export default function(props) {
   )
   return (
     <Modal
-      title={text}
+      title={name}
       width={500}
       closable={false}
       footer={null}
     >
       <InputFocus
         type="password"
-        value={password}
-        onChange={e => setPass(e.target.value)}
+        value={inputs}
+        onChange={e => setInputs(e.target.value)}
         onPressEnter={submit}
         addonAfter={confirm}
       />

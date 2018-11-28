@@ -106,6 +106,8 @@ export default class Index extends React.Component {
       .on('toggle-control', this.toggleControl)
       .on('new-ssh', this.onNewSsh)
       .on('openSettings', this.openSetting)
+      .on('keyboard-interactive', this.onKeyboardInteractive)
+      .on('change-password', this.onChangePassword)
     document.addEventListener('drop', function(e) {
       e.preventDefault()
       e.stopPropagation()
@@ -128,6 +130,14 @@ export default class Index extends React.Component {
       let term = _.get(this, `term_${currentTabId}.term`)
       term && term.focus()
     }
+  }
+
+  onChangePassword = (e) => {
+    console.log(e, 'cc')
+  }
+
+  onKeyboardInteractive = (e) => {
+    console.log(e, 'kk')
   }
 
   checkDefaultTheme () {

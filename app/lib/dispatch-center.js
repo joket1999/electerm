@@ -10,6 +10,8 @@ const {fsExport: fs} = require('./fs')
 const sftpInsts = {}
 const transferInsts = {}
 
+exports.interactiveWs = {}
+
 /**
  * add ws.s function
  * @param {*} ws
@@ -28,6 +30,11 @@ const wsDec = (ws) => {
 }
 
 const initWs = function (app) {
+
+  app.ws('/util/interactive', (ws) => {
+    wsDec(ws)
+    exports.interactiveWs = ws
+  })
 
   //sftp function
   app.ws('/sftp/:id', (ws) => {

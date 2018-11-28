@@ -19,28 +19,31 @@ const timeout = 1000 * 60 * 15
  * @param {array} prompts
  * @param {function} finish
  */
-function onKeyboardInteractive(
+exports.onKeyboardInteractive = (
   name,
   instructions,
   instructionsLang,
   prompts,
   finish
-) {
-  console.log(  name,
+) => {
+  console.log(
+    name,
     instructions,
     instructionsLang,
     prompts,
     finish
   )
+
   let id = generate()
   let handler
-  require('./win').win.webContents.send('keyboard-interactive', {
+  require('./dispatch-center').interactiveWs.s({
     name,
     instructions,
     instructionsLang,
     prompts,
     id
   })
+  finish(['B19DyT_4z'])
   const onEvent = (data) => {
     clearTimeout(handler)
     console.log('onevent ', data)
@@ -54,18 +57,18 @@ function onKeyboardInteractive(
 
 }
 
-function onChangePassword(
+exports.onChangePassword = (
   message,
   language,
   done
-) {
+) => {
   console.log(
     message,
     language
   )
   let id = generate()
   let handler
-  require('./win').win.webContents.send('keyboard-interactive', {
+  require('./win').win.webContents.send('change-password', {
     message,
     language,
     id
@@ -80,9 +83,4 @@ function onChangePassword(
     ipcRenderer.removeListener(id, onEvent)
   }, timeout)
   ipcRenderer.on(id, onEvent)
-}
-
-module.exports = {
-  onKeyboardInteractive,
-  onChangePassword
 }

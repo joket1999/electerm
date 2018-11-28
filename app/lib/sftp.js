@@ -31,6 +31,9 @@ class Sftp {
       },
       config
     )
+    if (!confs.password) {
+      delete confs.password
+    }
     return new Promise((resolve, reject) => {
       const run = (info) => {
         if (info && info.socket) {

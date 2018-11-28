@@ -52,7 +52,8 @@ class Terminal {
       const conn = new Client()
       let opts = Object.assign(
         {
-          tryKeyboard: true
+          tryKeyboard: true,
+          debug: console.log
         },
         {
           readyTimeout: _.get(initOptions, 'sshReadyTimeout'),
@@ -68,6 +69,9 @@ class Terminal {
           'passphrase'
         ])
       )
+      if (!opts.password) {
+        delete opts.password
+      }
       const run = (info) => {
         if (info && info.socket) {
           delete opts.host

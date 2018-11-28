@@ -31,7 +31,7 @@ const wsDec = (ws) => {
 
 const initWs = function (app) {
 
-  app.ws('/util/interactive', (ws) => {
+  app.ws('/u/interactive', (ws) => {
     wsDec(ws)
     exports.interactiveWs = ws
   })

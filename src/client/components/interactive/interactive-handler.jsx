@@ -13,32 +13,14 @@ export default function(props) {
     name,
     instructions,
     prompts,
-    visible,
-    modifier,
+    callback,
     id
   } = props
-  if (!visible) {
-    return null
-  }
   let submit = () => {
-    window._require('electron')
-      .ipcRenderer
-      .send(id, inputs)
-    modifier({
-      changePasswordProps: {
-        visible: false
-      }
-    })
+    callback(id, inputs)
   }
   let cancel = () => {
-    window._require('electron')
-      .ipcRenderer
-      .send(id, '')
-    modifier({
-      changePasswordProps: {
-        visible: false
-      }
-    })
+    callback(id, '')
   }
   let setState = (e, i) => {
     let {value} = e.target

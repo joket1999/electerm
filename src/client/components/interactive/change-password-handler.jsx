@@ -8,7 +8,7 @@ import InputFocus from '../common/input-auto-focus'
 
 export default function(props) {
   let [password, setPass] = useState('')
-  let {text, visible, modifier, id} = props
+  let {text, visible, callback, id} = props
   if (!visible) {
     return null
   }
@@ -17,24 +17,10 @@ export default function(props) {
     if (len < 6 || len > 20) {
       return message.error('password length must >= 6 and < 20')
     }
-    window._require('electron')
-      .ipcRenderer
-      .send(id, password)
-    modifier({
-      changePasswordProps: {
-        visible: false
-      }
-    })
+    callback(id, password)
   }
   let cancel = () => {
-    window._require('electron')
-      .ipcRenderer
-      .send(id, '')
-    modifier({
-      changePasswordProps: {
-        visible: false
-      }
-    })
+    callback(id, '')
   }
   let confirm = (
     <span>

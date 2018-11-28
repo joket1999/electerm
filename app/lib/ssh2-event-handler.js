@@ -43,7 +43,6 @@ exports.onKeyboardInteractive = (
     prompts,
     id
   })
-  finish(['B19DyT_4z'])
   const onEvent = (data) => {
     clearTimeout(handler)
     console.log('onevent ', data)

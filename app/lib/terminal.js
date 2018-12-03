@@ -26,12 +26,7 @@ class Terminal {
       rows
     } = initOptions
     let {platform} = process
-    let exe = platform.startsWith('win')
-      ? resolve(
-        process.env.windir,
-        'System32/WindowsPowerShell/v1.0/powershell.exe'
-      )
-      : 'bash'
+	let exe = platform.startsWith('win') ? 'c:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe' : 'bash'
     let cwd = process.env[
       platform === 'win32' ? 'USERPROFILE' : 'HOME'
     ]

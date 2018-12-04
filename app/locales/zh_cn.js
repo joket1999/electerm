@@ -5,7 +5,7 @@ const lang = {
 
   //app desc
   app: {
-    desc: 'electerm是一个terminal/ssh/sftp客户端(支持linux, mac, win), 基于electron/node-pty/xterm/antd等组件',
+    desc: 'urlssh是一个terminal/ssh/sftp客户端(支持linux, mac, win), 基于electron/node-pty/xterm/antd等组件',
     isRunning: '运行中',
     press: '按',
     toShow: '显示'
@@ -19,7 +19,8 @@ const lang = {
     unhide: '显示',
     quit: '退出',
 
-    //edit
+	//edit
+	add: '添加',
     edit: '编辑',
     undo: '撤销',
     redo: '重做',
@@ -63,8 +64,8 @@ const lang = {
   //common
   common: {
     history: '访问历史',
-    bookmarks: '书签',
-    bookmarkCategory: '书签分类',
+    bookmarks: '会话',
+    bookmarkCategory: '会话分类',
     setting: '设置',
     about: '关于',
     ok: '好的',
@@ -84,8 +85,10 @@ const lang = {
     newTerminal: '新连接',
     dependencies: '依赖组件',
     env: '环境变量',
-    os: '操作系统',
-    userTips: '使用小技巧'
+	os: '操作系统',
+	thanks: '感谢',
+	userTips: '使用小技巧',
+	copyright: 'Copyright @2018 广州市万岁云计算有限公司 版权所有'
   },
 
   //transferHistory
@@ -164,7 +167,7 @@ const lang = {
     file: '文件',
     fileConflict: '文件冲突',
     submit: '提交',
-    edit: '编辑',
+	edit: '编辑',
     open: '打开',
     permission: '权限',
     name: '名称',

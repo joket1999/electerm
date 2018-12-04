@@ -158,12 +158,12 @@ export default memo(props => {
     <div className="btns relative borderb fix">
       <div className="left-btns relative">
         <MenuBtn />
-        <Icon
+        {/* <Icon
           className="mg1r font20 pointer iblock control-icon"
           type="plus-circle"
           onClick={onNewSsh}
           title={e('newSsh')}
-        />
+        /> */}
         <SelectHover
           className="mg1r iblock btn-select"
           onSelect={onSelectHistory}
@@ -180,25 +180,27 @@ export default memo(props => {
           }
         </SelectHover>
         {bookmarkSelect}
-        <Tooltip title={`${m('edit')} ${c('bookmarks')}`}>
+        <Tooltip title={`${m('add')}${c('bookmarks')}`}>
           <Icon
-            type="edit"
+            type="plus"
             className="font16 mg1x mg2l pointer iblock control-icon icon-do-edit"
-            onClick={onNewSsh}
-          />
+			onClick={onNewSsh}
+		  />
         </Tooltip>
-        <Icon
+        {/* <Icon
           type="picture"
           className="font16 mg2l iblock pointer control-icon"
           onClick={openTerminalThemes}
           title={t('terminalThemes')}
-        />
-        <Icon
-          className="mg2l iblock pointer font16 control-icon"
-          type="setting"
-          onClick={openSetting}
-          title={c('setting')}
-        />
+		/> */}
+		<Tooltip title={`${c('setting')}`}>
+			<Icon
+			className="mg2l iblock pointer font16 control-icon"
+			type="setting"
+			onClick={openSetting}
+			title={c('setting')}
+			/>
+		</Tooltip>
         {
           transferHistory.length
             ? (
@@ -210,13 +212,15 @@ export default memo(props => {
               />
             )
             : null
-        }
-        <Icon
-          type="info-circle-o"
-          title={m('about')}
-          className="mg2l iblock pointer font16 control-icon open-about-icon"
-          onClick={openAbout}
-        />
+		}
+		<Tooltip title={`${c('about')}`}>
+			<Icon
+			type="info-circle-o"
+			title={m('about')}
+			className="mg2l iblock pointer font16 control-icon open-about-icon"
+			onClick={openAbout}
+			/>
+		</Tooltip>
       </div>
       <div className="right-btns">
         <Icon

@@ -9,7 +9,7 @@ import copy from 'json-deep-copy'
 import ContextMenu from '../common/context-menu'
 import FileInfoModal from '../sftp/file-props-modal'
 import FileModeModal from '../sftp/file-mode-modal'
-import UpdateCheck from './update-check'
+// import UpdateCheck from './update-check'
 import {notification} from 'antd'
 import openInfoModal from '../control/info-modal'
 import * as terminalThemes from '../../common/terminal-theme'
@@ -699,10 +699,10 @@ export default class Index extends React.Component {
           {...textEditorProps}
           modifier={this.modifier}
         />
-        <UpdateCheck
+        {/* <UpdateCheck
           modifier={this.modifier}
           shouldCheckUpdate={shouldCheckUpdate}
-        />
+        /> */}
         <ContextMenu
           {...contextMenuProps}
           visible={contextMenuVisible}

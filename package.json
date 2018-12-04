@@ -1,5 +1,5 @@
 {
-  "name": "electerm",
+  "name": "urlssh",
   "version": "0.25.41",
   "description": "Terminal/ssh/sftp client(linux, mac, win) based on electron/node-pty/xterm and other libs",
   "main": "dev-app.js",
@@ -26,17 +26,17 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/electerm/electerm.git"
+    "url": "https://www.urlos.com"
   },
   "author": {
-    "name": "ZHAO Xudong",
-    "email": "zxdong@gmail.com",
-    "url": "https://html5beta.com"
+    "name": "广州市万岁云计算有限公司",
+    "email": "service@urlos.com",
+    "url": "https://www.urlos.com"
   },
   "bugs": {
-    "url": "https://github.com/electerm/electerm/issues"
+    "url": "https://www.urlos.com"
   },
-  "homepage": "https://electerm.html5beta.com",
+  "homepage": "https://www.urlos.com",
   "engines": {
     "node": ">=8.9.1"
   },

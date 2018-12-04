@@ -7,7 +7,7 @@ import Link from '../common/external-link'
 import _ from 'lodash'
 import {
   logoPath1,
-  logoPath2
+//   logoPath2
 } from '../../common/constants'
 
 const {prefix, lang} = window
@@ -69,11 +69,11 @@ export default function({
           <TabPane tab={m('about')} key="1">
             <div className="pd2y aligncenter">
               <img src={logoPath1} className={`iblock mwm-100 ${cls1}`} />
-              <img src={logoPath2} className={`iblock mwm-100 ${cls2}`} />
+              {/* <img src={logoPath2} className={`iblock mwm-100 ${cls2}`} /> */}
             </div>
             <h1 className="mg2b font50">
               <span className="iblock mg1r">{name}</span>
-              <Tag color="#08c">{version}</Tag>
+              <Tag color="#0aa679">{version}</Tag>
             </h1>
             <p className="mg1b">{a('desc')}</p>
             <p className="mg1b">
@@ -94,7 +94,7 @@ export default function({
                 <Icon type="download" /> {homepage}
               </Link>
             </p>
-            <p className="mg1b">
+            {/* <p className="mg1b">
               <b className="mg1r">github:</b>
               <Link to={link} className="mg1l">
                 <Icon type="github" /> {link}
@@ -114,7 +114,7 @@ export default function({
               >
                 {e('checkForUpdate')}
               </Button>
-            </p>
+            </p> */}
           </TabPane>
           <TabPane tab={e('userTips')} key="0">
             <ul>
@@ -147,7 +147,7 @@ export default function({
               })
             }
           </TabPane>
-          <TabPane tab={e('env')} key="3">
+          {/* <TabPane tab={e('env')} key="3">
             {
               Object.keys(envs).map((k, i) => {
                 let v = envs[k]
@@ -180,7 +180,7 @@ export default function({
                 )
               })
             }
-          </TabPane>
+          </TabPane> */}
         </Tabs>
 
       </div>

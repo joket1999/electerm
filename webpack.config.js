@@ -123,7 +123,10 @@ var config = {
             options: {
               javascriptEnabled: true,
               modifyVars: {
-                'border-radius-base': '3px'
+				'border-radius-base': '3px',
+				'primary-color': '#0aa679',
+				'link-color': '#0aa679',
+				'warning-color': '#0aa679'
               }
             }
           }

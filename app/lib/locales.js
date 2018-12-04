@@ -9,10 +9,7 @@ const {resolve} = require('path')
 const {userConfig} = require('./user-config-controller')
 const {sync} = require('os-locale')
 
-let path = (isDev
-  ? '../'
-  : '') +
-  '../node_modules/@electerm/electerm-locales/locales'
+let path = '../locales'
 let localeFolder = resolve(__dirname, path)
 
 //languages array

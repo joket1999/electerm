@@ -46,11 +46,7 @@ const isDev = NODE_ENV === 'development'
 const packInfo = require(isDev ? '../package.json' : './package.json')
 const iconPath = resolve(
   __dirname,
-  (
-    isDev
-      ? '../node_modules/@electerm/electerm-resource/res/imgs/electerm-round-128x128.png'
-      : 'assets/images/electerm-round-128x128.png'
-  )
+  './resource/res/imgs/electerm-round-128x128.png'
 )
 
 function onClose() {

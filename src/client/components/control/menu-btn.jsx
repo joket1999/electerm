@@ -15,7 +15,7 @@ const onOpenMenu = e => {
     y
   })
 }
-const logo = require('node_modules/@electerm/electerm-resource/res/imgs/electerm.svg').replace(/^\//, '')
+const logo = '../../images/urlssh-round-128x128.png'
 
 export default memo(() => {
   return (

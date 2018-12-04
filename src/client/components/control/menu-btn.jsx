@@ -15,7 +15,7 @@ const onOpenMenu = e => {
     y
   })
 }
-const logo = '../../images/urlssh-round-128x128.png'
+const logo = 'images/urlssh-round-128x128.png'
 
 export default memo(() => {
   return (

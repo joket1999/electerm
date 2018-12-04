@@ -19,7 +19,7 @@ export default (perm, _onClick) => {
     : _.noop
   return (
     <div key={name + 'pr'} className="pd1b">
-      <span className="iblock mg1r">{e(name)}</span>
+      <span className="iblock mg1r" style={{width: '50px', textAlign: 'right'}}>{e(name)}</span>
       <Group className="iblock">
         {
           Object.keys(permission).map(n => {

@@ -91,7 +91,7 @@ export default memo(props => {
       className="mg1x mg1t"
       title={t('export')}
       key="export"
-    />,
+    >{t('export')}</Button>,
     <Upload
       beforeUpload={beforeUpload}
       fileList={[]}
@@ -101,7 +101,7 @@ export default memo(props => {
         icon="upload"
         className="mg1t"
         title={f('importFromFile')}
-      />
+      >{f('importFromFile')}</Button>
     </Upload>
   ]
 })

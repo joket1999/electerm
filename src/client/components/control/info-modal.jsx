@@ -70,7 +70,7 @@ export default function ({
                 <Tabs defaultActiveKey="1">
                     <TabPane tab={m('about')} key="1">
                         <div className="pd2y aligncenter">
-                            <img src={logoPath1} className={`iblock mwm-100 ${cls1}`} />
+                            <img src={logoPath1} className="iblock mwm-100" />
                             {/* <img src={logoPath2} className={`iblock mwm-100 ${cls2}`} /> */}
                         </div>
                         <h1 className="mg2b font50">

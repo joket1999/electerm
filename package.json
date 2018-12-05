@@ -107,14 +107,12 @@
     "webpack": "4.21.0",
     "webpack-cli": "3.1.2",
     "webpack-dev-server": "3.1.9",
-    "xterm": "3.8.0",
-    "@electerm/electerm-resource": "1.2.1"
+    "xterm": "3.8.0"
   },
   "dependencies": {
     "bluebird": "3.5.2",
     "body-parser": "1.18.3",
     "cors": "2.8.4",
-    "@electerm/electerm-locales": "0.4.12",
     "electron-log": "2.2.17",
     "express": "4.16.4",
     "express-ws": "4.0.0",

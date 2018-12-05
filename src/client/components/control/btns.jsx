@@ -215,14 +215,14 @@ export default memo(props => {
             )
             : null
 		}
-		<Tooltip title={`${c('about')}`}>
+		{/* <Tooltip title={`${c('about')}`}>
 			<Icon
 			type="info-circle-o"
 			title={m('about')}
 			className="mg2l iblock pointer font16 control-icon open-about-icon"
 			onClick={openAbout}
 			/>
-		</Tooltip>
+		</Tooltip> */}
 		<Button
 			size="small"
 			type="default"
@@ -230,6 +230,7 @@ export default memo(props => {
 			style={{marginLeft: 20}}
 			onClick={openUrlosModal}
 		>
+			<Icon type="link" />
 			{e('urlos')}
 		</Button>
       </div>

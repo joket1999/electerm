@@ -39,6 +39,7 @@ const t = prefix('terminalThemes')
 const {Option} = Select
 
 const authFailMsg = 'All configured authentication methods failed'
+const privateKeyMsg = 'Encrypted private key detected'
 const typeSshConfig = 'ssh-config'
 
 const computePos = (e, height) => {
@@ -67,7 +68,8 @@ export default class Term extends React.PureComponent {
       savePassword: false,
       tempPassword: '',
       searchVisible: false,
-      searchInput: ''
+      searchInput: '',
+      passType: 'password'
     }
   }
 
@@ -129,6 +131,7 @@ export default class Term extends React.PureComponent {
       'resize',
       this.onResize
     )
+    window.removeEventListener('message', this.handleEvent)
     this.dom.removeEventListener('contextmenu', this.onContextMenu)
   }
 
@@ -180,10 +183,14 @@ export default class Term extends React.PureComponent {
       'resize',
       this.onResize
     )
+    window.addEventListener('message', this.handleEvent)
   }
 
   handleEvent = (e) => {
-    if (keyControlPressed(e) && e.code === 'KeyF') {
+    if (e.data && e.data.id === this.props.id) {
+      this.term.selectAll()
+    }
+    else if (keyControlPressed(e) && e.code === 'KeyF') {
       this.openSearch()
     } else if (
       e.ctrlKey &&
@@ -208,6 +215,16 @@ export default class Term extends React.PureComponent {
       if (txt) {
         copy(txt)
       }
+    }
+  }
+
+  onBlur = () => {
+    if (
+      this.props.id === this.props.activeTerminalId
+    ) {
+      this.props.modifier({
+        activeTerminalId: ''
+      })
     }
   }
 
@@ -401,6 +418,7 @@ export default class Term extends React.PureComponent {
     })
     term.open(document.getElementById(id), true)
     term.on('focus', this.setActive)
+    term.on('blur', this.onBlur)
     term.on('selection', this.onSelection)
     term.on('keydown', this.handleEvent)
     this.term = term
@@ -412,6 +430,9 @@ export default class Term extends React.PureComponent {
 
   setActive = () => {
     this.props.setActive(this.props.id)
+    this.props.modifier({
+      activeTerminalId: this.props.id
+    })
   }
 
   initData = () => {
@@ -465,11 +486,9 @@ export default class Term extends React.PureComponent {
     let url = `http://${host}:${port}/terminals`
     let {tab = {}} = this.props
     let {startPath, srcId, from = 'bookmarks', type, loginScript} = tab
-    let {tempPassword, savePassword} = this.state
+    let {savePassword} = this.state
     let isSshConfig = type === terminalSshConfigType
-    let extra = tempPassword
-      ? {password: tempPassword}
-      : {}
+    let extra = this.props.sessionOptions
     let pid = await fetch.post(url, {
       cols,
       rows,
@@ -487,13 +506,17 @@ export default class Term extends React.PureComponent {
           ? await response.text()
           : _.isPlainObject(response) ? JSON.stringify(response) : response
         if (text.includes(authFailMsg)) {
+          this.setState(() => ({ passType: 'password' }))
           return 'fail'
+        } else if (text.includes(privateKeyMsg)) {
+          this.setState(() => ({ passType: 'passphrase' }))
+          return 'fail-private'
         } else {
           handleErr({message: text})
         }
       }
     })
-    if (pid === 'fail') {
+    if (pid.includes('fail')) {
       return this.promote()
     }
     if (savePassword) {
@@ -507,6 +530,9 @@ export default class Term extends React.PureComponent {
       return
     }
     this.setStatus(statusMap.success)
+    this.props.setSessionState({
+      sessionOptions: extra || {}
+    })
     term.pid = pid
     this.pid = pid
     wsUrl = `ws://${host}:${port}/terminals/${pid}`
@@ -634,6 +660,15 @@ export default class Term extends React.PureComponent {
   }
 
   onClickConfirmPass = () => {
+    let {
+      tempPassword,
+      passType
+    }  = this.state
+    this.props.setSessionState({
+      sessionOptions: {
+        [passType]: tempPassword
+      }
+    })
     this.setState({
       promoteModalVisible: false
     }, this.remoteInit)

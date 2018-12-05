@@ -1,23 +1,23 @@
 {
   "name": "urlssh",
-  "version": "0.25.41",
-  "description": "Terminal/ssh/sftp client(linux, mac, win) based on electron/node-pty/xterm and other libs",
+  "version": "0.25.45",
+  "description": "Terminal/ssh/sftp client(linux, mac, win) based on electron/node-pty/xterm/antd and other libs",
   "main": "dev-app.js",
   "bin": "npm/electerm",
   "scripts": {
-    "app": "cd app && NODE_ENV=development nohup ../node_modules/.bin/electron ./app",
+    "app": "node bin/app",
     "build": "./node_modules/.bin/cross-env NODE_ENV=production ./node_modules/.bin/webpack --progress",
     "start": "./node_modules/.bin/webpack-dev-server --progress --colors --content-base app/assets/",
     "icon": "node bin/icon",
-    "ver": "node bin/generate-version.js",
-    "clean": "rm -rf app/assets/js && rm -rf app/assets/css && rm -rf app/assets/images && rm -rf app/assets/index.html",
+    "ver": "node bin/generate-version",
+    "clean": "node bin/clean",
     "compile": "node bin/build",
-    "prepublishOnly": "node npm/prepublish.js",
-    "postpublish": "node npm/postpublish.js",
+    "prepublishOnly": "node npm/prepublish",
+    "postpublish": "node npm/postpublish",
     "prepare-file": "node bin/prepare",
     "output": "./node_modules/.bin/electron-builder",
     "release": "npm run pre-test && npm run output",
-    "preinstall": "rm -rf package-lock.json",
+    "preinstall": "node bin/preinstall",
     "postinstall": "node bin/post-install",
     "lint": "./node_modules/.bin/eslint --max-warnings 0 --ext .js --ext .jsx src app bin test",
     "test": "./node_modules/.bin/mocha test/e2e/*.js",
@@ -26,17 +26,17 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://www.urlos.com"
+    "url": "git+https://github.com/electerm/electerm.git"
   },
   "author": {
-    "name": "广州市万岁云计算有限公司",
-    "email": "service@urlos.com",
-    "url": "https://www.urlos.com"
+    "name": "ZHAO Xudong",
+    "email": "zxdong@gmail.com",
+    "url": "https://html5beta.com"
   },
   "bugs": {
-    "url": "https://www.urlos.com"
+    "url": "https://github.com/electerm/electerm/issues"
   },
-  "homepage": "https://www.urlos.com",
+  "homepage": "https://electerm.html5beta.com",
   "engines": {
     "node": ">=8.9.1"
   },

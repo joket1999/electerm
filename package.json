@@ -23,6 +23,16 @@
     "test": "./node_modules/.bin/mocha test/e2e/*.js",
     "pre-test": "npm run compile && npm run prepare-file"
   },
+  "license": "MIT",
+  "author": {
+    "name": "广州市万岁云计算有限公司",
+    "email": "service@urlos.com",
+    "url": "https://www.urlos.com"
+  },
+  "bugs": {
+    "url": "https://www.urlos.com"
+  },
+  "homepage": "https://www.urlos.com",
   "engines": {
     "node": ">=8.9.1"
   },

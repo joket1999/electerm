@@ -35,25 +35,25 @@ export default function ({
             url: authorUrl
         },
         homepage,
-        repository: {
-            url
-        },
+        // repository: {
+        //     url
+        // },
         version: packVer
     } = getGlobal('packInfo')
     let version = 'v' + packVer
-    let link = url.replace('git+', '').replace('.git', '')
-    let os = getGlobal('os')
-    let env = getGlobal('env')
+    // let link = url.replace('git+', '').replace('.git', '')
+    // let os = getGlobal('os')
+    // let env = getGlobal('env')
     let deps = {
         ...devDependencies,
         ...dependencies
     }
     let versions = getGlobal('versions')
-    let envs = {
-        ...versions,
-        ...env
-    }
-    let bugReportLink = link + '/issues'
+    // let envs = {
+    //     ...versions,
+    //     ...env
+    // }
+    // let bugReportLink = link + '/issues'
     let cls1 = Math.random() > 0.5
         ? 'hide'
         : ''

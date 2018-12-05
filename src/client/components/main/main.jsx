@@ -88,7 +88,8 @@ export default class Index extends React.Component {
       tab: settingMap.bookmarks,
       autofocustrigger: + new Date(),
       bookmarkId: undefined,
-      showModal: false,
+	  showModal: false,
+	  showUrlosModal: false,
       activeTerminalId: ''
     }
     let title = createTitlte(tabs[0])
@@ -625,6 +626,18 @@ export default class Index extends React.Component {
     })
   }
 
+  openUrlosModal = () => {
+    this.setState({
+      showUrlosModal: true
+    })
+  }
+
+  hideUrlosModal = () => {
+    this.setState({
+      showUrlosModal: false
+    })
+  }
+
   getItems = (tab, props = this.state) => {
     return tab === settingMap.terminalThemes
       ? copy(props.themes)
@@ -681,7 +694,8 @@ export default class Index extends React.Component {
         'addTransferHistory',
         'onError', 'openContextMenu',
         'modifyLs', 'addItem', 'editItem', 'delItem',
-        'onCheckUpdate', 'openAbout',
+		'onCheckUpdate', 'openAbout', 
+		'hideUrlosModal', 'openUrlosModal',
         'setTheme', 'addTheme', 'editTheme', 'delTheme',
         'addBookmarkGroup',
         'editBookmarkGroup',

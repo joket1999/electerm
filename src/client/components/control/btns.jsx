@@ -6,7 +6,8 @@ import {memo} from 'react'
 import {
   Select,
   Icon,
-  Tooltip
+  Tooltip,
+  Button
 } from 'antd'
 import createName from '../../common/create-title'
 import copy from 'json-deep-copy'
@@ -40,7 +41,8 @@ export default memo(props => {
     bookmarkGroups = [],
     history = [],
     onNewSsh,
-    openAbout,
+	openAbout,
+	openUrlosModal,
     openTransferHistory,
     bookmarkId,
     modifier,
@@ -221,6 +223,15 @@ export default memo(props => {
 			onClick={openAbout}
 			/>
 		</Tooltip>
+		<Button
+			size="small"
+			type="default"
+			className="iblock"
+			style={{marginLeft: 20}}
+			onClick={openUrlosModal}
+		>
+			{e('urlos')}
+		</Button>
       </div>
       <div className="right-btns">
         <Icon

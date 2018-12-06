@@ -152,17 +152,13 @@ export default class Tabs extends React.Component {
         <div
           className="tabs-inner"
           style={{
-			width,
-			height: '100%'
+			width
           }}
         >
           <div
             className="tabs-wrapper relative"
             style={{
-			  	width: tabsWidthAll + extraWidth + 10,
-			  	height: '100%',
-				display: 'flex',
-				alignItems: 'center'
+			  	width: tabsWidthAll + extraWidth + 10
             }}
             onDoubleClick={this.onAdd}
           >

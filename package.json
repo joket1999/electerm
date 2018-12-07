@@ -1,6 +1,6 @@
 {
   "name": "urlssh",
-  "version": "0.25.50",
+  "version": "0.1.0",
   "description": "Terminal/ssh/sftp client(linux, mac, win) based on electron/node-pty/xterm/antd and other libs",
   "main": "dev-app.js",
   "bin": "npm/electerm",

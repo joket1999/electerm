@@ -1,5 +1,5 @@
 /**
- * hisotry/bookmark/setting modal
+ * components/control/urlos modal
  */
 
 import { memo } from 'react'
@@ -23,7 +23,7 @@ export default memo(props => {
 			}}
 		>
 			<iframe
-				src="http://php.dev.dockeradmin.com:8868/?m=admin&c=user&a=login&v=99999.0.0&um=1LmbNb"
+				src="https://www.urlos.com"
 				frameborder="0"
 				style={{ width: '100%', height: 'calc(100% - 48px)' }}
 			>

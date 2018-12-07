@@ -79,10 +79,9 @@ export default function ({
                         </h1>
                         {/* <p className="mg1b">{a('desc')}</p> */}
                         <p className="mg1b">
-                            {/* <b className="mg1r">{e('author')}:</b> */}
+                            <b className="mg1r">{e('support').split('：')[0]}:</b>
                             <Link to={authorUrl} className="mg1l">
-                                {/* Copyright ©2018 {authorName} 版权所有 */}
-                                {e('copyright')}
+                                {e('support').split('：')[1]}
                             </Link>
                         </p>
                         <p className="mg1b">

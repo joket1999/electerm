@@ -88,8 +88,8 @@ const lang = {
 	os: '操作系统',
 	thanks: '感谢',
 	userTips: '使用小技巧',
-	copyright: 'Copyright @2018 广州市万岁云计算有限公司 版权所有',
-	urlos: 'URLOS服务中心'
+	support: '技术支持：广州市万岁云计算有限公司',
+	urlos: '服务中心'
   },
 
   //transferHistory

@@ -1,75 +1,61 @@
 const { Application } = require('spectron')
-const electronPath = require('electron')
-const {resolve} = require('path')
 const delay = require('./common/wait')
-const cwd = process.cwd()
-const _ = require('lodash')
-const {log} = console
-const {expect} = require('chai')
+const log = require('./common/log')
+const { expect } = require('chai')
+const appOptions = require('./common/app-options')
+const prefixer = require('./common/lang')
+const extendClient = require('./common/client-extend')
+const isOs = require('./common/is-os')
+
+if (!process.env.LOCAL_TEST && isOs('darwin')) {
+  return
+}
 
 describe('history', function () {
-
   this.timeout(100000)
 
-  beforeEach(async function() {
-    this.app = new Application({
-      path: electronPath,
-      webdriverOptions: {
-        deprecationWarnings: false
-      },
-      args: [resolve(cwd, 'work/app'), '--no-session-restore']
-    })
+  beforeEach(async function () {
+    this.app = new Application(appOptions)
     return this.app.start()
   })
 
-  afterEach(function() {
+  afterEach(function () {
     if (this.app && this.app.isRunning()) {
       return this.app.stop()
     }
   })
 
-  it('all buttons open proper history tab', async function() {
+  it('all buttons open proper history tab', async function () {
     const { client, electron } = this.app
-    let {lang} = await electron.remote.getGlobal('et')
-    let prefix = prefix => {
-      return (id) => {
-        return _.get(lang, `${prefix}.${id}`) || id
-      }
-    }
-    let e = prefix('common')
+    extendClient(client)
+    const prefix = await prefixer(electron)
+    const e = prefix('common')
     await client.waitUntilWindowLoaded()
-    await delay(500)
+    await delay(3500)
 
     log('button:edit')
-    await client.click('.btns .anticon-edit')
-    await delay(500)
-    let sel = '.ant-modal .ant-tabs-line > .ant-tabs-bar .ant-tabs-tab-active'
-    let active = await client.element(sel)
-    expect(!!active.value).equal(true)
-    let text = await client.getText(sel)
+    await client.click('.btns .anticon-plus-circle')
+    await delay(3500)
+    const sel = '.setting-wrap .ant-tabs-nav-list .ant-tabs-tab-active'
+    const active = await client.element(sel)
+    await delay(1500)
+    expect(!!active.elementId).equal(true)
+    const text = await client.getText(sel)
     expect(text).equal(e('bookmarks'))
 
     log('tab it')
-    await client.execute(function() {
-      document.querySelectorAll('.ant-modal .ant-tabs-bar .ant-tabs-tab')[0].click()
-    })
+    await client.click('.setting-wrap .ant-tabs-nav-list .ant-tabs-tab')
 
-    await delay(100)
-    let text4 = await client.getText(sel)
+    await delay(3000)
+    const text4 = await client.getText(sel)
     expect(text4).equal(e('history'))
 
     log('auto focus works')
-    let focus = await client.hasFocus('.ant-modal .ant-tabs-tabpane-active #host')
+    const focus = await client.hasFocus('.setting-wrap .ant-tabs-tabpane-active #ssh-form_host')
     expect(focus).equal(true)
     log('list tab')
-    await client.execute(function() {
-      document.querySelectorAll('.ant-modal .ant-tabs-tabpane-active .item-list-unit')[1].click()
-    })
-    let list1 = await client.getAttribute('.ant-modal .ant-tabs-tabpane-active .item-list-unit:nth-child(1)', 'class')
+    await client.click('.setting-wrap .ant-tabs-tabpane-active .item-list-unit')
+    const list1 = await client.getAttribute('.setting-wrap .ant-tabs-tabpane-active .item-list-unit:nth-child(1)', 'class')
     expect(list1.includes('active'))
-
-
-
   })
-
 })

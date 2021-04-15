@@ -2,25 +2,35 @@
 /**
  * terminal/sftp wrapper
  */
-import React from 'react'
+import { Component } from 'react'
 import Term from '../terminal'
-import Sftp from '../sftp'
-import {Icon} from 'antd'
+import Sftp from '../sftp/sftp-entry'
+import {
+  BorderVerticleOutlined,
+  BorderHorizontalOutlined,
+  CloseSquareFilled,
+  SearchOutlined,
+  FullscreenOutlined
+} from '@ant-design/icons'
+import { Tooltip } from 'antd'
 import _ from 'lodash'
-import {generate} from 'shortid'
+import { nanoid as generate } from 'nanoid/non-secure'
 import copy from 'json-deep-copy'
 import classnames from 'classnames'
 import {
-  topMenuHeight, tabsHeight,
+  tabsHeight,
   terminalSplitDirectionMap, termControlHeight,
-  paneMap
+  paneMap, terminalSshConfigType, ctrlOrCmd
 } from '../../common/constants'
 import ResizeWrap from '../common/resize-wrap'
 import keyControlPressed from '../../common/key-control-pressed'
+import keyPressed from '../../common/key-pressed'
+import TerminalInfoContent from '../terminal-info/content'
+import './session.styl'
 
 const rebuildPosition = terminals => {
-  let indexs = terminals.map(t => t.position).sort((a, b) => a - b)
-  let indexMap = indexs.reduce((prev, pos, index) => {
+  const indexs = terminals.map(t => t.position).sort((a, b) => a - b)
+  const indexMap = indexs.reduce((prev, pos, index) => {
     return {
       ...prev,
       [pos]: index * 10
@@ -38,49 +48,51 @@ const getPrevTerminal = terminals => {
   return _.last(terminals)
 }
 
-
-const {prefix} = window
+const { prefix } = window
 const e = prefix('ssh')
 const m = prefix('menu')
 
-export default class WindowWrapper extends React.PureComponent  {
-
-  constructor(props) {
+export default class SessionWrapper extends Component {
+  constructor (props) {
     super(props)
-    let id = generate()
+    const id = generate()
     this.state = {
+      pid: null,
       pane: paneMap.terminal,
       splitDirection: terminalSplitDirectionMap.horizontal,
       activeSplitId: id,
       key: Math.random(),
       sessionOptions: null,
-      sshConnected: false,
+      enableSftp: props.tab.enableSftp,
+      sessionId: generate(),
       terminals: [
         {
           id,
           position: 0
         }
-      ]
+      ],
+      showInfo: false,
+      infoPanelProps: {}
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.initEvent()
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     this.destroyEvent()
   }
 
-  initEvent() {
+  initEvent () {
     window.addEventListener('keydown', this.handleEvent)
   }
 
-  destroyEvent() {
+  destroyEvent () {
     window.removeEventListener('keydown', this.handleEvent)
   }
 
-  isActive() {
+  isActive () {
     return this.props.currentTabId === this.props.tab.id &&
       this.state.pane === paneMap.terminal
   }
@@ -89,15 +101,26 @@ export default class WindowWrapper extends React.PureComponent  {
     if (!this.isActive()) {
       return
     }
-    if (keyControlPressed(e) && e.code === 'Slash') {
+    if (keyControlPressed(e) && keyPressed(e, '/')) {
       this.doSplit()
     }
   }
 
+  handleShowInfo = (infoPanelProps) => {
+    this.setState({
+      showInfo: true,
+      infoPanelProps
+    })
+  }
+
+  hideInfoPanel = () => {
+    this.setState({
+      showInfo: false
+    })
+  }
+
   computeHeight = () => {
-    let {showControl} = this.props
-    return this.props.height -
-      (showControl ? topMenuHeight : 0) - tabsHeight
+    return this.props.height - tabsHeight
   }
 
   onChangePane = pane => {
@@ -129,21 +152,22 @@ export default class WindowWrapper extends React.PureComponent  {
   }
 
   delSplit = () => {
-    let {activeSplitId, terminals} = this.state
+    const { activeSplitId, terminals } = this.state
     let newTerms = terminals.filter(t => t.id !== activeSplitId)
     if (!newTerms.length) {
       return
     }
     newTerms = rebuildPosition(newTerms)
-    let newActiveId = getPrevTerminal(newTerms).id
+    const newActiveId = getPrevTerminal(newTerms).id
     this.setState({
       terminals: newTerms,
       activeSplitId: newActiveId
     })
+    this.props.store.focus()
   }
 
   changeDirection = () => {
-    let {splitDirection} = this.state
+    const { splitDirection } = this.state
     this.setState({
       splitDirection: splitDirection === terminalSplitDirectionMap.horizontal
         ? terminalSplitDirectionMap.vertical
@@ -158,21 +182,21 @@ export default class WindowWrapper extends React.PureComponent  {
   }
 
   computePosition = (index) => {
-    let len = this.state.terminals.length || 1
-    let {width: windowWidth} = this.props
-    let {splitDirection} = this.state
-    let isHori = splitDirection === terminalSplitDirectionMap.horizontal
-    let heightAll = this.computeHeight()
-    let width = isHori
+    const len = this.state.terminals.length || 1
+    const { width: windowWidth } = this.props
+    const { splitDirection } = this.state
+    const isHori = splitDirection === terminalSplitDirectionMap.horizontal
+    const heightAll = this.computeHeight()
+    const width = isHori
       ? windowWidth / len
       : windowWidth
-    let height = isHori
+    const height = isHori
       ? heightAll
       : heightAll / len
-    let left = isHori
+    const left = isHori
       ? index * width
       : 0
-    let top = isHori
+    const top = isHori
       ? 0
       : index * height
     return {
@@ -184,13 +208,20 @@ export default class WindowWrapper extends React.PureComponent  {
   }
 
   renderTerminals = () => {
-    let {pane, terminals, splitDirection, sessionOptions} = this.state
-    let cls = pane === paneMap.terminal
-      ? 'terms-box bg-black'
-      : 'terms-box bg-black hide'
-    let {props} = this
-    let height = this.computeHeight()
-    let {width, tab} = props
+    const {
+      pane,
+      terminals,
+      activeSplitId,
+      splitDirection,
+      sessionOptions,
+      sessionId
+    } = this.state
+    const cls = pane === paneMap.terminal
+      ? 'terms-box'
+      : 'terms-box hide'
+    const height = this.computeHeight()
+    const { store, width, tab } = this.props
+    const themeConfig = copy(store.getThemeConfig())
     return (
       <div
         className={cls}
@@ -204,20 +235,30 @@ export default class WindowWrapper extends React.PureComponent  {
           tab={tab}
         >
           {
-            terminals.map((t) => {
-              let pops = {
-                ...props,
+            terminals.map((t, index) => {
+              const pops = {
+                ...this.props,
                 ...t,
+                activeSplitId,
+                themeConfig,
                 pane,
                 ..._.pick(
                   this,
-                  ['setActive', 'doSplit', 'setSessionState']
-                ),
+                  [
+                    'setActive',
+                    'doSplit',
+                    'setSessionState',
+                    'handleShowInfo',
+                    'onChangePane',
+                    'hideInfoPanel'
+                  ]),
                 ...this.computePosition(t.position / 10)
               }
               return (
                 <Term
                   key={t.id}
+                  sessionId={sessionId}
+                  terminalIndex={index}
                   sessionOptions={sessionOptions}
                   {...pops}
                 />
@@ -230,54 +271,89 @@ export default class WindowWrapper extends React.PureComponent  {
   }
 
   renderSftp = () => {
-    let {pane, sessionOptions, sshConnected} = this.state
-    let height = this.computeHeight()
-    let {props} = this
-    let cls = pane === paneMap.terminal
+    const { pane, sessionOptions, enableSftp, sessionId, pid } = this.state
+    const height = this.computeHeight()
+    const cls = pane === paneMap.terminal
       ? 'hide'
       : ''
     return (
       <div className={cls}>
         <Sftp
-          {...props}
+          pid={pid}
           sessionOptions={sessionOptions}
-          sshConnected={sshConnected}
           height={height}
+          enableSftp={enableSftp}
+          sessionId={sessionId}
           pane={pane}
+          {...this.props}
         />
       </div>
     )
   }
 
+  handleFullscreen = () => {
+    this.props.store.toggleTermFullscreen(true)
+  }
+
+  handleOpenSearch = () => {
+    window.postMessage({
+      action: 'open-terminal-search',
+      id: this.state.activeSplitId
+    }, '*')
+  }
+
+  renderSearchIcon = () => {
+    const title = e('search')
+    return (
+      <Tooltip title={title}>
+        <SearchOutlined
+          className='mg1r icon-info font16 iblock pointer spliter'
+          onClick={this.handleOpenSearch} />
+      </Tooltip>
+    )
+  }
+
+  fullscreenIcon = () => {
+    const title = e('fullscreen')
+    return (
+      <Tooltip title={title}>
+        <FullscreenOutlined
+          className='mg1r icon-info font16 iblock pointer spliter'
+          onClick={this.handleFullscreen} />
+      </Tooltip>
+    )
+  }
+
   renderControl = () => {
-    let {pane, splitDirection, terminals} = this.state
-    let {props} = this
-    let host = _.get(props, 'tab.host')
-    let isHori = splitDirection === terminalSplitDirectionMap.horizontal
-    let cls1 = 'mg1r icon-split pointer iblock spliter'
-    let cls2 = 'icon-direction pointer iblock spliter'
-    let icon1 = isHori
-      ? 'border-horizontal'
-      : 'border-verticle'
-    let icon2 = !isHori
-      ? 'border-horizontal'
-      : 'border-verticle'
-    let hide = terminals.length < 2
-    let types = [
+    const { pane, splitDirection, terminals } = this.state
+    const { props } = this
+    const host = _.get(props, 'tab.host') &&
+      _.get(props, 'tab.type') !== terminalSshConfigType
+    const isHori = splitDirection === terminalSplitDirectionMap.horizontal
+    const cls1 = 'mg1r icon-split pointer iblock spliter'
+    const cls2 = 'icon-direction pointer iblock spliter'
+    const Icon1 = isHori
+      ? BorderHorizontalOutlined
+      : BorderVerticleOutlined
+    const Icon2 = !isHori
+      ? BorderHorizontalOutlined
+      : BorderVerticleOutlined
+    const hide = terminals.length < 2
+    const types = [
       paneMap.terminal,
       paneMap.fileManager
     ]
     return (
       <div
-        className="terminal-control fix"
+        className='terminal-control fix'
       >
-        <div className="term-sftp-tabs fleft">
+        <div className='term-sftp-tabs fleft'>
           {
             [
               host ? paneMap.ssh : paneMap.terminal,
               host ? paneMap.sftp : paneMap.fileManager
             ].map((type, i) => {
-              let cls = classnames(
+              const cls = classnames(
                 'type-tab',
                 type,
                 {
@@ -291,6 +367,7 @@ export default class WindowWrapper extends React.PureComponent  {
                   onClick={() => this.onChangePane(types[i])}
                 >
                   {e(type)}
+                  <span className='type-tab-line' />
                 </span>
               )
             })
@@ -299,32 +376,35 @@ export default class WindowWrapper extends React.PureComponent  {
         {
           pane === paneMap.terminal
             ? (
-              <div className="fright term-controls">
+              <div className='fright term-controls'>
+                {this.fullscreenIcon()}
+                {this.renderSearchIcon()}
                 {
                   hide
                     ? null
                     : (
-                      <Icon
-                        type="close-circle"
-                        theme="filled"
-                        className="mg1r icon-trash font16 iblock pointer"
+                      <CloseSquareFilled
+                        className='mg1r icon-trash font16 iblock pointer spliter'
                         onClick={this.delSplit}
-                        title={m('del')}
-                      />
+                        title={m('del')} />
                     )
                 }
-                <Icon
-                  type={icon1}
-                  className={cls1}
-                  onClick={this.doSplit}
-                  title={e('split') + '(Ctrl + /)'}
-                />
-                <Icon
-                  type={icon2}
-                  className={cls2}
+                <Tooltip
+                  title={`${e('split')}(${ctrlOrCmd} + /)`}
+                >
+                  <Icon1
+                    className={cls1}
+                    onClick={this.doSplit}
+                  />
+                </Tooltip>
+                <Tooltip
                   title={e('changeDirection')}
-                  onClick={this.changeDirection}
-                />
+                >
+                  <Icon2
+                    className={cls2}
+                    onClick={this.changeDirection}
+                  />
+                </Tooltip>
               </div>
             )
             : null
@@ -333,18 +413,43 @@ export default class WindowWrapper extends React.PureComponent  {
     )
   }
 
-  render() {
-    let {pane, splitDirection} = this.state
+  render () {
+    const {
+      pane,
+      splitDirection,
+      infoPanelProps,
+      showInfo
+    } = this.state
+    const infoProps = {
+      ..._.pick(this.props.config, ['host', 'port', 'saveTerminalLogToFile']),
+      ...infoPanelProps,
+      showInfo,
+      // pid,
+      // sessionId,
+      // isRemote: this.isRemote(),
+      // isActive: this.isActiveTerminal(),
+      hideInfoPanel: this.hideInfoPanel
+    }
+    const cls = classnames(
+      'term-sftp-box',
+      pane,
+      splitDirection,
+      {
+        'is-transporting': this.props.tab.isTransporting
+      }
+    )
     return (
       <div
-        className={'term-sftp-box ' + pane + ' ' + splitDirection}
+        className={cls}
         id={`is-${this.props.tab.id}`}
       >
         {this.renderControl()}
         {this.renderTerminals()}
         {this.renderSftp()}
+        <TerminalInfoContent
+          {...infoProps}
+        />
       </div>
     )
   }
-
 }

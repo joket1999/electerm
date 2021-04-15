@@ -5,20 +5,28 @@
  * @param {String} nameOrDot
  * @return {String}
  */
+
 export default (basePath, nameOrDot) => {
-  let sep = basePath.includes('\\') || basePath.includes(':')
+  const sep = basePath.includes('\\') || basePath.includes(':')
     ? '\\'
     : '/'
   if (nameOrDot === '..') {
-    let arr = basePath.split(sep)
-    let {length} = arr
+    const arr = basePath.split(sep)
+    const { length } = arr
     if (length === 1) {
-      return basePath
+      return '/'
     }
-    let res = arr.slice(0, length - 1).join(sep)
-    return res ? res : '/'
+    const res = arr.slice(0, length - 1).join(sep)
+    return res || '/'
   }
-  return basePath +
-    (basePath === '/' ? '' : sep) +
+  const pre = nameOrDot.includes(':') && basePath === '/'
+    ? ''
+    : basePath
+  return pre +
+    (basePath.endsWith(sep) ? '' : sep) +
     nameOrDot
+}
+
+export const osResolve = (...args) => {
+  return window.pre.resolve(...args)
 }

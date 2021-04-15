@@ -3,19 +3,19 @@
  * show last sessions for user to recover
  */
 
-import {memo} from 'react'
-import {Modal, Button, Checkbox} from 'antd'
+import { memo } from 'react'
+import { Modal, Button, Checkbox } from 'antd'
 import copy from 'json-deep-copy'
 import _ from 'lodash'
 import createName from '../../common/create-title'
 
-const {prefix} = window
+const { prefix } = window
 const c = prefix('common')
 
 export default memo(props => {
-  let {
+  const {
     sessionModalVisible,
-    modifier,
+    storeAssign,
     addTab,
     selectedSessions
   } = props
@@ -24,47 +24,47 @@ export default memo(props => {
     return null
   }
 
-  let onConfirmLoadSession = () => {
-    modifier({
+  const onConfirmLoadSession = () => {
+    storeAssign({
       sessionModalVisible: false,
       selectedSessions: []
     })
-    let saved = copy(
+    const saved = copy(
       selectedSessions
         .filter(s => s.checked)
     )
       .map(s => s.tab)
-    for (let s of saved) {
+    for (const s of saved) {
       setTimeout(() => {
         addTab(s)
       }, 100)
     }
-    window.getGlobal('setExitStatus')('ok')
+    window.pre.runGlobalAsync('setExitStatus', 'ok')
   }
 
-  let onCancelLoadSession = () => {
-    modifier({
+  const onCancelLoadSession = () => {
+    storeAssign({
       sessionModalVisible: false
     })
-    window.getGlobal('setExitStatus')('ok')
+    window.pre.runGlobalAsync('setExitStatus', 'ok')
   }
 
-  let toggoleSelection = (e, id) => {
-    let {checked} = e.target
-    let ss = copy(selectedSessions)
-    let s = _.find(ss, s => s.id === id)
+  const toggoleSelection = (e, id) => {
+    const { checked } = e.target
+    const ss = copy(selectedSessions)
+    const s = _.find(ss, s => s.id === id)
     s.checked = checked
-    modifier({
+    storeAssign({
       selectedSessions: ss
     })
   }
 
-  let content = (
+  const content = (
     <div>
       {
         selectedSessions.map(s => {
-          let {id, tab, checked} = s
-          let title = createName(tab)
+          const { id, tab, checked } = s
+          const title = createName(tab)
           return (
             <div key={id}>
               <Checkbox
@@ -79,13 +79,13 @@ export default memo(props => {
       }
     </div>
   )
-  let footer = (
+  const footer = (
     <div>
       <Button
-        type="primary"
+        type='primary'
         disabled={!selectedSessions.filter(s => s.checked).length}
         onClick={onConfirmLoadSession}
-        className="mg1r"
+        className='mg1r'
       >
         {c('ok')}
       </Button>

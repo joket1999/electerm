@@ -2,21 +2,22 @@
  * history list
  */
 import React from 'react'
-import {Tooltip, Icon, Popconfirm} from 'antd'
+import { CloseOutlined, EditOutlined } from '@ant-design/icons'
+import { Tooltip, Popconfirm } from 'antd'
 import Search from '../common/search'
 import createName from '../../common/create-title'
 import classnames from 'classnames'
 import _ from 'lodash'
 import highlight from '../common/highlight'
+import { settingSyncId, settingCommonId } from '../../common/constants'
 import './list.styl'
 
-const {prefix} = window
+const { prefix } = window
 const e = prefix('menu')
 const c = prefix('common')
 const s = prefix('setting')
 
 export default class ItemList extends React.PureComponent {
-
   state = {
     keyword: ''
   }
@@ -29,12 +30,17 @@ export default class ItemList extends React.PureComponent {
 
   del = (item, e) => {
     e.stopPropagation()
-    this.props.delItem(item, this.props.type)
+    this.props.store.delItem(item, this.props.type)
+  }
+
+  editItem = (e, item, isGroup) => {
+    e.stopPropagation()
+    this.props.store.openBookmarkEdit(item)
   }
 
   renderSearch = () => {
     return (
-      <div className="pd1y pd2r">
+      <div className='pd1y pd2r'>
         <Search
           onChange={this.onChange}
           value={this.state.keyword}
@@ -44,21 +50,19 @@ export default class ItemList extends React.PureComponent {
   }
 
   renderDelBtn = item => {
-    if (!item.id) {
+    if (!item.id || [settingSyncId, settingCommonId].includes(item.id) || item.id.startsWith('default')) {
       return null
     }
-    let {shouldComfirmDel} = this.props
-    let icon = (
-      <Icon
-        type="close"
+    const { shouldComfirmDel } = this.props
+    const icon = (
+      <CloseOutlined
         title={e('del')}
-        className="pointer list-item-remove"
+        className='pointer list-item-remove'
         onClick={
           shouldComfirmDel
             ? _.noop
             : e => this.del(item, e)
-        }
-      />
+        } />
     )
     if (shouldComfirmDel) {
       return (
@@ -67,7 +71,7 @@ export default class ItemList extends React.PureComponent {
           onConfirm={e => this.del(item, e)}
           okText={e('del')}
           cancelText={c('cancel')}
-          placement="top"
+          placement='top'
         >
           {icon}
         </Popconfirm>
@@ -77,10 +81,10 @@ export default class ItemList extends React.PureComponent {
   }
 
   renderItem = (item, i) => {
-    let {onClickItem, type, activeItemId} = this.props
-    let {id} = item
+    const { onClickItem, type, activeItemId } = this.props
+    const { id } = item
     let title = createName(item)
-    let cls = classnames(
+    const cls = classnames(
       'item-list-unit',
       {
         active: activeItemId === id
@@ -90,6 +94,7 @@ export default class ItemList extends React.PureComponent {
       title,
       this.state.keyword
     )
+    const isGroup = false
     return (
       <div
         key={i + '__' + id}
@@ -98,17 +103,18 @@ export default class ItemList extends React.PureComponent {
       >
         <Tooltip
           title={title}
-          placement="right"
+          placement='topLeft'
         >
-          <div className="elli pd1y pd2x">{title || s('new')}</div>
+          <div className='elli pd1y pd2x list-item-title'>{title || s('new')}</div>
         </Tooltip>
         {this.renderDelBtn(item)}
+        {this.renderEditBtn(item, isGroup)}
       </div>
     )
   }
 
   filter = list => {
-    let {keyword} = this.state
+    const { keyword } = this.state
     return keyword
       ? list.filter(item => {
         return createName(item).toLowerCase().includes(keyword.toLowerCase())
@@ -116,16 +122,32 @@ export default class ItemList extends React.PureComponent {
       : list
   }
 
-  render() {
+  renderEditBtn = (item, isGroup) => {
+    if (
+      (this.props.staticList && isGroup) ||
+      (!this.props.staticList && !isGroup)
+    ) {
+      return null
+    }
+    return (
+      <EditOutlined
+        title={e('edit')}
+        onClick={(e) => this.editItem(e, item, isGroup)}
+        className='pointer list-item-edit' />
+    )
+  }
+
+  render () {
     let {
-      list,
-      type
+      list = [],
+      type,
+      listStyle = {}
     } = this.props
     list = this.filter(list)
     return (
       <div className={`item-list item-type-${type}`}>
         {this.renderSearch()}
-        <div className="item-list-wrap">
+        <div className='item-list-wrap' style={listStyle}>
           {
             list.map(this.renderItem)
           }
@@ -133,6 +155,4 @@ export default class ItemList extends React.PureComponent {
       </div>
     )
   }
-
 }
-

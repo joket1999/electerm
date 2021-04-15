@@ -2,165 +2,181 @@
  * default text editor for remote file
  */
 
-import React from 'react'
-import {
-  Form, Button, Input,
-  Spin,
-  Modal
-} from 'antd'
-import {validateFieldsAndScroll} from '../../common/dec-validate-and-scroll'
+import { useState, useEffect } from 'react'
+import fs from '../../common/fs'
+import { Button, Input, Spin, Modal, Form } from 'antd'
 import resolve from '../../common/resolve'
+import { typeMap } from '../../common/constants'
 
 const FormItem = Form.Item
-const {prefix} = window
+const { prefix } = window
 const e = prefix('form')
 const c = prefix('common')
 const s = prefix('sftp')
 
-export class TextEditorForm extends React.PureComponent {
-
-  state = {
+export default function TextEditorForm (props) {
+  const [form] = Form.useForm()
+  const [state, setter] = useState({
     text: '',
     path: 'loading...',
     loading: true
+  })
+  function setState (update) {
+    setter(old => {
+      return {
+        ...old,
+        ...update
+      }
+    })
   }
-
-  componentDidMount() {
-    if (this.props.visible) {
-      this.fetchText()
+  useEffect(() => {
+    if (props.visible) {
+      fetchText()
     }
-  }
+  }, [])
 
-  fetchText = async () => {
-    this.setState({
+  async function fetchText () {
+    setState({
       loading: true
     })
-    let {
-      sftp,
+    const {
+      sftpFunc,
       file: {
         path,
-        name
+        name,
+        type
       }
-    } = this.props
-    let p = resolve(path, name)
-    this.setState({
+    } = props
+    const p = resolve(path, name)
+    setState({
       path: p
     })
-    let text = await sftp.readFile(p)
-    this.setState({
+    const sftp = sftpFunc()
+    const text = typeMap.remote === type
+      ? await sftp.readFile(p)
+      : await fs.readFile(p)
+    setState({
       text: text || '',
       loading: false
-    }, this.props.form.resetFields)
+    })
+    form.resetFields()
   }
 
-  handleSubmit = async (evt) => {
-    evt.preventDefault()
-    let res = await this.validateFieldsAndScroll()
-    if (!res) {
-      return
-    }
-    this.setState({
+  function submit () {
+    form.submit()
+  }
+
+  async function handleSubmit (res) {
+    setState({
       loading: true
     })
-    if (res.text === this.state.text) {
-      return this.cancel()
+    if (res.text === state.text) {
+      return cancel()
     }
-    let r = await this.props.sftp.writeFile(
-      this.state.path,
-      res.text,
-      this.props.file.mode
-    )
-    r && this.props.afterWrite()
-    this.cancel()
+    const {
+      sftpFunc,
+      file: {
+        type,
+        mode
+      }
+    } = props
+    const sftp = sftpFunc()
+    const r = typeMap.remote === type
+      ? await sftp.writeFile(
+        state.path,
+        res.text,
+        mode
+      )
+      : await fs.writeFile(
+        state.path,
+        res.text,
+        mode
+      )
+    r && props.afterWrite()
+    cancel()
   }
 
-  cancel = () => {
-    this.props.modifier({
+  function cancel () {
+    props.storeAssign({
       textEditorProps: {}
     })
   }
 
-  onPressEnter = e => {
+  function onPressEnter (e) {
     e.stopPropagation()
   }
 
-  renderForm() {
+  function renderForm () {
     const {
       text
-    } = this.state
-    const {getFieldDecorator} = this.props.form
+    } = state
     return (
       <Form
-        onSubmit={this.handleSubmit}
-        layout="vertical"
+        onFinish={handleSubmit}
+        form={form}
+        name='text-edit-form'
+        layout='vertical'
+        initialValues={{ text }}
       >
-        <FormItem>
-          {getFieldDecorator('text', {
-            initialValue: text
-          })(
-            <Input.TextArea rows={20} onPressEnter={this.onPressEnter}>{text}</Input.TextArea>
-          )}
+        <FormItem
+          name='text'
+        >
+          <Input.TextArea
+            rows={20}
+            onPressEnter={onPressEnter}
+          >{text}</Input.TextArea>
         </FormItem>
       </Form>
     )
   }
 
-  renderFooter() {
-    let {loading} = this.state
+  function renderFooter () {
+    const { loading } = state
     return (
       <div>
         <Button
-          type="primary"
-          className="mg1r"
+          type='primary'
+          className='mg1r mg1b'
           disabled={loading}
-          onClick={this.handleSubmit}
+          onClick={submit}
         >{e('save')}</Button>
         <Button
-          type="ghost"
-          className="mg1r"
+          type='ghost'
+          className='mg1r mg1b'
           disabled={loading}
-          onClick={() => this.props.form.resetFields()}
+          onClick={() => form.resetFields()}
         >{s('reset')}</Button>
         <Button
-          type="ghost"
-          onClick={this.cancel}
+          type='ghost'
+          onClick={cancel}
           disabled={loading}
-          className="mg2r"
+          className='mg2r mg1b'
         >{c('cancel')}</Button>
       </div>
     )
   }
 
-  render() {
-    const {visible} = this.props
-    if (!visible) {
-      return null
-    }
-    const {path, loading} = this.state
-    const title = `${s('edit')} ${s('remote')} ${s('file')}: ${path}`
-    let props = {
-      footer: this.renderFooter(),
-      title,
-      maskClosable: false,
-      onCancel: this.cancel,
-      width: '90%',
-      visible
-    }
-    return (
-      <Modal
-        {...props}
-      >
-        <Spin spinning={loading}>
-          {this.renderForm()}
-        </Spin>
-      </Modal>
-    )
+  const { visible } = props
+  if (!visible) {
+    return null
   }
-
+  const { path, loading } = state
+  const title = `${s('edit')} ${s('remote')} ${s('file')}: ${path}`
+  const propsAll = {
+    footer: renderFooter(),
+    title,
+    maskClosable: false,
+    onCancel: cancel,
+    width: '90%',
+    visible
+  }
+  return (
+    <Modal
+      {...propsAll}
+    >
+      <Spin spinning={loading}>
+        {renderForm()}
+      </Spin>
+    </Modal>
+  )
 }
-
-@Form.create()
-@validateFieldsAndScroll
-class TextEditor extends TextEditorForm {}
-
-export default TextEditor

@@ -2,28 +2,27 @@
  * sftp through ws
  */
 
-import {generate} from 'shortid'
+import { nanoid as generate } from 'nanoid/non-secure'
 import Transfer from './transfer'
-import {transferTypeMap} from './constants'
+import { transferTypeMap } from './constants'
 import initWs from './ws'
+import { instSftpKeys as keys } from '../../app/common/constants'
 
-const keys = window.getGlobal('instSftpKeys')
 const transferKeys = Object.keys(transferTypeMap)
 
 class Sftp {
-
-  constructor() {}
-
-  async init () {
-    let id = generate()
-    let ws = await initWs('sftp', id)
+  async init (sessionId) {
+    const id = generate()
+    const ws = await initWs('sftp', id, sessionId)
     this.ws = ws
     this.id = id
+    this.sessionId = sessionId
     ws.s({
       action: 'sftp-new',
-      id
+      id,
+      sessionId
     })
-    let th = this
+    const th = this
     this.ws = ws
     keys.forEach(func => {
       th[func] = async (...args) => {
@@ -31,23 +30,23 @@ class Sftp {
           return Transfer({
             sftpId: id,
             ...args[0],
+            sessionId,
             type: func
           })
         }
-        let uid = func + ':' + id
-        //let ws = await initWs()
+        const uid = func + ':' + id
+        // let ws = await initWs()
         return new Promise((resolve, reject) => {
           ws.s({
             action: 'sftp-func',
             id,
             func,
-            args
+            args,
+            sessionId
           })
           ws.once((arg) => {
             if (arg.error) {
-              console.log('sftp error')
-              console.log(arg.error.message)
-              console.log(arg.error.stack)
+              log.debug('sftp error', arg.error.message)
               return reject(new Error(arg.error.message))
             }
             resolve(arg.data)
@@ -57,19 +56,19 @@ class Sftp {
     })
   }
 
-  async destroy() {
-    let {ws} = this
+  async destroy () {
+    const { ws } = this
     ws.s({
       action: 'sftp-destroy',
-      id: this.id
+      id: this.id,
+      sessionId: this.sessionId
     })
     ws.close()
   }
-
 }
 
-export default async () => {
-  let sftp = new Sftp()
-  await sftp.init()
+export default async (sessionId) => {
+  const sftp = new Sftp()
+  await sftp.init(sessionId)
   return sftp
 }

@@ -3,42 +3,85 @@
  */
 
 import React from 'react'
-import {Icon, Tooltip, message, Badge} from 'antd'
+import runIdle from '../../common/run-idle'
+import {
+  CloseOutlined,
+  CodeOutlined,
+  CopyOutlined,
+  EditOutlined,
+  Loading3QuartersOutlined,
+  BorderlessTableOutlined
+} from '@ant-design/icons'
+
+import { Tooltip, message } from 'antd'
 import classnames from 'classnames'
 import copy from 'json-deep-copy'
 import _ from 'lodash'
 import Input from '../common/input-auto-focus'
-import wait from '../../common/wait'
 import createName from '../../common/create-title'
-import {addClass, removeClass} from '../../common/class'
-import {generate} from 'shortid'
-import {statusMap} from '../../common/constants'
+import { addClass, removeClass } from '../../common/class'
+import {
+  terminalSshConfigType,
+  ctrlOrCmd
+} from '../../common/constants'
 
-const {prefix} = window
+const { prefix } = window
 const e = prefix('tabs')
 const m = prefix('menu')
 const onDragCls = 'ondrag-tab'
 const onDragOverCls = 'dragover-tab'
 
 export default class Tab extends React.Component {
-
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
+      terminalOnData: false,
       tab: copy(props.tab)
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.dom = document.getElementById('id' + this.state.tab.id)
+    window.addEventListener('message', this.onEvent)
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (!_.isEqual(nextProps.tab, this.props.tab)) {
+  componentDidUpdate (prevProps) {
+    if (!_.isEqual(prevProps.tab, this.props.tab)) {
       this.setState({
-        tab: copy(nextProps.tab)
+        tab: copy(this.props.tab)
       })
     }
+  }
+
+  componentWillUnmount () {
+    window.removeEventListener('message', this.onEvent)
+    clearTimeout(this.handler)
+  }
+
+  modifier = (...args) => {
+    runIdle(() => this.setState(...args))
+  }
+
+  onEvent = (e) => {
+    if (
+      e.data &&
+      e.data.action === 'terminal-receive-data' &&
+      e.data.tabId === this.state.tab.id
+    ) {
+      this.modifier({
+        terminalOnData: true
+      })
+      if (this.handler) {
+        clearTimeout(this.handler)
+      }
+      this.handler = setTimeout(this.offTerminalOnData, 4000)
+    }
+  }
+
+  offTerminalOnData = () => {
+    this.modifier({
+      terminalOnData: false
+    })
   }
 
   clearCls = () => {
@@ -57,73 +100,63 @@ export default class Tab extends React.Component {
   }
 
   onDragExit = () => {
-    //debug('ondragexit')
-    //let {target} = e
-    //removeClass(target, 'sftp-dragover')
+    // debug('ondragexit')
+    // let {target} = e
+    // removeClass(target, 'sftp-dragover')
   }
 
   onDragLeave = e => {
-    //debug('ondragleave')
-    let {target} = e
+    // debug('ondragleave')
+    const { target } = e
     removeClass(target, onDragOverCls)
   }
 
   onDragOver = e => {
-    //debug('ondragover')
-    //debug(e.target)
-    //removeClass(this.dom, 'sftp-dragover')
+    // debug('ondragover')
+    // debug(e.target)
+    // removeClass(this.dom, 'sftp-dragover')
     e.preventDefault()
   }
 
   onDragStart = e => {
-    //debug('ondragstart')
-    //debug(e.target)
+    // debug('ondragstart')
+    // debug(e.target)
     e.dataTransfer.setData('fromFile', JSON.stringify(this.state.tab))
-    //e.effectAllowed = 'copyMove'
+    // e.effectAllowed = 'copyMove'
   }
 
   onDrop = e => {
     e.preventDefault()
-    let {target} = e
+    const { target } = e
     if (!target) {
       return
     }
     // debug('target drop', target)
-    let fromTab = JSON.parse(e.dataTransfer.getData('fromFile'))
-    let onDropTab = document.querySelector('.' + onDragOverCls)
+    const fromTab = JSON.parse(e.dataTransfer.getData('fromFile'))
+    const onDropTab = document.querySelector('.' + onDragOverCls)
     if (!onDropTab || !fromTab) {
       return
     }
-    let dropId = onDropTab.getAttribute('data-id')
+    const dropId = onDropTab.getAttribute('data-id')
     if (!dropId || dropId === fromTab.id) {
       return
     }
-    let {id} = fromTab
-    let tabs = copy(this.props.tabs)
-    let indexFrom = _.findIndex(tabs, t => t.id === id)
+    const { id } = fromTab
+    const tabs = copy(this.props.tabs)
+    const indexFrom = _.findIndex(tabs, t => t.id === id)
     let indexDrop = _.findIndex(tabs, t => t.id === dropId)
     if (indexDrop > indexFrom) {
       indexDrop = indexDrop - 1
     }
     tabs.splice(indexFrom, 1)
     tabs.splice(indexDrop, 0, fromTab)
-    this.props.modifier({
+    this.props.store.storeAssign({
       tabs
     })
   }
 
   reloadTab = async () => {
-    let tab = copy(
-      this.state.tab
-    )
-    let {id} = tab
-    tab.id = generate()
-    tab.status = statusMap.processing
-    let tabs = copy(this.props.tabs)
-    let index = _.findIndex(tabs, t => t.id === id)
-    this.props.delTab({id: this.state.tab.id})
-    await wait(30)
-    this.props.addTab(tab, index)
+    this.props.store.reloadTab(this.state.tab)
   }
 
   onDragEnd = e => {
@@ -133,18 +166,18 @@ export default class Tab extends React.Component {
   }
 
   close = () => {
-    this.props.delTab({id: this.state.tab.id})
+    this.props.store.delTab({ id: this.state.tab.id })
     if (this.props.tabs.length <= 1) {
-      setTimeout(this.props.addTab, 1)
+      setTimeout(this.props.store.addTab, 1)
     }
   }
 
   dup = () => {
-    this.props.onDuplicateTab(this.props.tab)
+    this.props.store.onDuplicateTab(this.props.tab)
   }
 
   doRename = () => {
-    let tab = copy(this.state.tab)
+    const tab = copy(this.state.tab)
     tab.titleTemp = tab.title || ''
     tab.isEditting = true
     this.setState({
@@ -153,24 +186,27 @@ export default class Tab extends React.Component {
   }
 
   onBlur = () => {
-    let tab = copy(this.state.tab)
-    let {titleTemp, title, id, host} = tab
+    const tab = copy(this.state.tab)
+    const { titleTemp, title, id, host } = tab
     if (!titleTemp && !host) {
       return message.warn(e('titleEmptyWarn'))
     }
+    delete tab.isEditting
     if (title === titleTemp) {
       delete tab.titleTemp
-      delete tab.isEditting
       return this.setState({
         tab
       })
     }
-    this.props.editTab(id, {title: titleTemp})
+    this.setState({
+      tab
+    })
+    this.props.store.editTab(id, { title: titleTemp })
   }
 
   onChange = e => {
-    let titleTemp = e.target.value
-    let tab = copy(this.state.tab)
+    const titleTemp = e.target.value
+    const tab = copy(this.state.tab)
     tab.titleTemp = titleTemp
     this.setState({
       tab
@@ -178,39 +214,40 @@ export default class Tab extends React.Component {
   }
 
   closeOther = () => {
-    this.props.modifier({
+    this.props.store.storeAssign({
       tabs: [this.props.tab],
       currentTabId: this.props.tab.id
     })
   }
 
   closeTabsRight = () => {
-    let {tabs, tab, currentTabId} = this.props
-    let index = _.findIndex(tabs, t => t.id === tab.id)
+    let { tabs, tab, currentTabId } = this.props
+    const index = _.findIndex(tabs, t => t.id === tab.id)
     tabs = tabs.slice(0, index + 1)
-    let update = {
+    const update = {
       tabs
     }
     if (!_.some(tabs, t => t.id === currentTabId)) {
       update.currentTabId = tabs[0].id
     }
-    this.props.modifier(update)
+    this.props.store.storeAssign(update)
   }
 
-  renderContext() {
-    let {tabs, tab} = this.props
-    let len = tabs.length
-    let index = _.findIndex(tabs, t => t.id === tab.id)
-    let nother = len === 1
-    let noRight = index >= len - 1
-    let cls = 'pd2x pd1y context-item pointer'
+  renderContext () {
+    const { tabs, tab } = this.props
+    const len = tabs.length
+    const index = _.findIndex(tabs, t => t.id === tab.id)
+    const nother = len === 1
+    const noRight = index >= len - 1
+    const cls = 'pd2x pd1y context-item pointer'
+    const isSshConfig = tab.type === terminalSshConfigType
     return (
       <div>
         <div
           className={cls}
           onClick={this.close}
         >
-          <Icon type="close" /> {e('close')}
+          <CloseOutlined /> {e('close')} ({ctrlOrCmd} + W)
         </div>
         {
           nother
@@ -220,7 +257,7 @@ export default class Tab extends React.Component {
                 className={cls}
                 onClick={this.closeOther}
               >
-                <Icon type="close" /> {e('closeOtherTabs')}
+                <CloseOutlined /> {e('closeOtherTabs')}
               </div>
             )
         }
@@ -232,34 +269,34 @@ export default class Tab extends React.Component {
                 className={cls}
                 onClick={this.closeTabsRight}
               >
-                <Icon type="close" /> {e('closeTabRight')}
+                <CloseOutlined /> {e('closeTabRight')}
               </div>
             )
         }
 
         <div
           className={cls}
-          onClick={() => this.props.addTab()}
+          onClick={() => this.props.store.addTab()}
         >
-          <Icon type="code-o" /> {e('newTab')}
+          <CodeOutlined /> {e('newTab')}
         </div>
         <div
           className={cls}
           onClick={this.dup}
         >
-          <Icon type="copy" /> {e('duplicate')}
+          <CopyOutlined /> {e('duplicate')}
         </div>
         <div
-          className={cls}
-          onClick={this.doRename}
+          className={cls + (isSshConfig ? ' disabled' : '')}
+          onClick={isSshConfig ? _.noop : this.doRename}
         >
-          <Icon type="edit" /> {e('rename')}
+          <EditOutlined /> {e('rename')}
         </div>
         <div
           className={cls}
           onClick={this.reloadTab}
         >
-          <Icon type="loading-3-quarters" theme="outlined" /> {m('reload')}
+          <Loading3QuartersOutlined /> {m('reload')}
         </div>
       </div>
     )
@@ -267,10 +304,10 @@ export default class Tab extends React.Component {
 
   onContextMenu = e => {
     e.preventDefault()
-    let {target} = e
-    let rect = target.getBoundingClientRect()
-    let content = this.renderContext()
-    this.props.openContextMenu({
+    const { target } = e
+    const rect = target.getBoundingClientRect()
+    const content = this.renderContext()
+    this.props.store.openContextMenu({
       content,
       pos: {
         left: rect.left,
@@ -279,8 +316,8 @@ export default class Tab extends React.Component {
     })
   }
 
-  renderEditting(tab, cls) {
-    let {
+  renderEditting (tab, cls) {
+    const {
       titleTemp
     } = tab
     return (
@@ -295,24 +332,34 @@ export default class Tab extends React.Component {
     )
   }
 
-  render() {
-    let {
+  render () {
+    const {
       currentTabId,
       onChangeTabId,
       onDuplicateTab
-    } = this.props
-    let {tab} = this.state
-    let {id, isEditting, status} = tab
-    let active = id === currentTabId
-    let cls = classnames('tab', {active}, status)
-    let title = createName(tab)
+    } = this.props.store
+    const { tab, terminalOnData } = this.state
+    const { id, isEditting, status, isTransporting } = tab
+    const active = id === currentTabId
+    const cls = classnames(
+      'tab',
+      { active },
+      status,
+      {
+        'is-terminal-active': terminalOnData
+      },
+      {
+        'is-transporting': isTransporting
+      }
+    )
+    const title = createName(tab)
     if (isEditting) {
       return this.renderEditting(tab, cls)
     }
     return (
       <Tooltip
         title={title}
-        placement="top"
+        placement='top'
       >
         <div
           className={cls}
@@ -331,27 +378,23 @@ export default class Tab extends React.Component {
           ])}
         >
           <div
-            className="tab-title elli pd1x"
+            className='tab-title elli pd1x'
             onClick={() => onChangeTabId(id)}
             onDoubleClick={() => onDuplicateTab(tab)}
             onContextMenu={this.onContextMenu}
           >
-            <Badge status={status} />
-            <Icon
-              className="pointer tab-reload mg1r"
-              type="loading-3-quarters"
-              theme="outlined"
+            <Loading3QuartersOutlined
+              className='pointer tab-reload mg1r'
               onClick={this.reloadTab}
-              title={m('reload')}
-            />
+              title={m('reload')} />
             {title}
           </div>
-          <Icon
-            className="pointer tab-close"
-            type="close-circle"
-            theme="filled"
-            onClick={this.close}
-          />
+          <div className={'tab-status ' + status} />
+          <div className='tab-traffic' />
+          <BorderlessTableOutlined className='tab-terminal-feed' />
+          <span className='tab-close pointer'>
+            <CloseOutlined onClick={this.close} />
+          </span>
         </div>
       </Tooltip>
     )

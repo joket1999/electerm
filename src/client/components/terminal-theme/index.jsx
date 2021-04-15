@@ -1,169 +1,168 @@
 
-import {BookmarkForm} from '../bookmark-form'
-import {
-  Form, Button, Input,
-  message,
-  Upload
-} from 'antd'
-import {validateFieldsAndScroll} from '../../common/dec-validate-and-scroll'
-import {convertTheme, convertThemeToText, exportTheme, defaultTheme} from '../../common/terminal-theme'
-import {generate} from 'shortid'
-import {formItemLayout, tailFormItemLayout} from '../../common/form-layout'
+import { useRef } from 'react'
+import { Button, Input, message, Upload, Form } from 'antd'
+import { convertTheme, convertThemeToText, exportTheme } from '../../common/terminal-theme'
+import { defaultTheme, defaultThemeLight } from '../../common/constants'
+import { nanoid as generate } from 'nanoid/non-secure'
+import { formItemLayout, tailFormItemLayout } from '../../common/form-layout'
 import InputAutoFocus from '../common/input-auto-focus'
 
-const {TextArea} = Input
+const { TextArea } = Input
 const FormItem = Form.Item
-const {prefix} = window
+const { prefix } = window
 const e = prefix('form')
 const s = prefix('setting')
 const t = prefix('terminalThemes')
 
-@Form.create()
-@validateFieldsAndScroll
-class ThemeForm extends BookmarkForm {
-
-  export = () => {
-    exportTheme(this.props.formData.id)
+export default function ThemeForm (props) {
+  const [form] = Form.useForm()
+  const action = useRef('submit')
+  function exporter () {
+    exportTheme(props.formData.id)
   }
-
-  handleSubmit = async (e, saveOnly = false) => {
-    e.preventDefault()
-    let res = await this.validateFieldsAndScroll()
-    if (!res) return
-    let {formData} = this.props
-    let {
+  function saveOnly () {
+    action.current = 'saveOnly'
+    form.submit()
+  }
+  async function handleSubmit (res) {
+    const { formData } = props
+    const {
       themeName,
       themeText
     } = res
-    let update = {
+    const update = {
       name: themeName,
-      themeConfig: convertTheme(themeText).themeConfig
+      ...convertTheme(themeText)
     }
-    let update1 = {
+    const update1 = {
       ...update,
       id: generate()
     }
     if (formData.id) {
-      this.props.editTheme(formData.id, update)
+      props.store.editTheme(formData.id, update)
     } else {
-      this.props.addTheme(update1)
-      this.props.modifier({
+      props.store.addTheme(update1)
+      props.store.storeAssign({
         item: update1
       })
     }
-    if (!saveOnly) {
-      this.props.setTheme(
+    if (action.current !== 'saveOnly') {
+      props.store.setTheme(
         formData.id || update1.id
       )
     }
     message.success(s('saved'))
+    action.current = 'submit'
   }
 
-  beforeUpload = (file) => {
-    let txt = window.getGlobal('fs')
+  function beforeUpload (file) {
+    const txt = window.pre
       .readFileSync(file.path).toString()
-    let {name, themeConfig} = convertTheme(txt)
-    this.props.form.setFieldsValue({
+    const { name, themeConfig, uiThemeConfig } = convertTheme(txt)
+    form.setFieldsValue({
       themeName: name,
       themeText: convertThemeToText({
-        name, themeConfig
+        themeConfig, uiThemeConfig
       })
     })
     return false
   }
 
-  render() {
-    const {getFieldDecorator} = this.props.form
-    const {
-      themeConfig,
-      id,
-      name: themeName
-    } = this.props.formData
-    let {autofocustrigger} = this.props
-    let themeText = convertThemeToText({themeConfig, name})
-    let isDefaultTheme = id === defaultTheme.id
-    return (
-      <Form onSubmit={this.handleSubmit} className="form-wrap">
-        <FormItem {...tailFormItemLayout}>
-          {
-            id
-              ? (
-                <Button
-                  type="ghost"
-                  onClick={this.export}
-                >{t('export')}</Button>
-              )
-              : null
-          }
-        </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label={t('themeName')}
-          hasFeedback
-        >
-          {getFieldDecorator('themeName', {
-            rules: [{
-              max: 30, message: '30 chars max'
-            }, {
-              required: true, message: 'theme name required'
-            }],
-            initialValue: themeName
-          })(
-            <InputAutoFocus selectall="true" disabled={isDefaultTheme} autofocustrigger={autofocustrigger} />
-          )}
-        </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label={t('themeConfig')}
-        >
-          {getFieldDecorator('themeText', {
-            rules: [{
-              max: 1000, message: '1000 chars max'
-            }, {
-              required: true, message: 'theme Config required'
-            }],
-            initialValue: themeText
-          })(
-            <TextArea rows={18} disabled={isDefaultTheme} />
-          )}
-          <div className="pd1t">
-            <Upload
-              beforeUpload={this.beforeUpload}
-              fileList={[]}
-              className="mg1b"
-            >
-              <Button
-                type="ghost"
-                disabled={isDefaultTheme}
-              >
-                {e('importFromFile')}
-              </Button>
-            </Upload>
-          </div>
-        </FormItem>
-        {
-          isDefaultTheme
-            ? null
-            : (
-              <FormItem {...tailFormItemLayout}>
-                <p>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    className="mg1r"
-                  >{t('saveAndApply')}</Button>
-                  <Button
-                    type="ghost"
-                    onClick={e => this.handleSubmit(e, true)}
-                  >{e('save')}</Button>
-                </p>
-              </FormItem>
-            )
-        }
-      </Form>
-    )
+  const {
+    id,
+    name: themeName
+  } = props.formData
+  const initialValues = {
+    themeName,
+    themeText: convertThemeToText(props.formData)
   }
-
+  const { autofocustrigger } = props.store
+  const isDefaultTheme = id === defaultTheme.id || id === defaultThemeLight.id
+  return (
+    <Form
+      onFinish={handleSubmit}
+      form={form}
+      initialValues={initialValues}
+      className='form-wrap'
+      name='terminal-theme-form'
+    >
+      <FormItem {...tailFormItemLayout}>
+        {
+          id
+            ? (
+              <Button
+                type='ghost'
+                onClick={exporter}
+              >{t('export')}</Button>
+            )
+            : null
+        }
+      </FormItem>
+      <FormItem
+        {...formItemLayout}
+        label={t('themeName')}
+        hasFeedback
+        name='themeName'
+        rules={[{
+          max: 30, message: '30 chars max'
+        }, {
+          required: true, message: 'theme name required'
+        }]}
+      >
+        <InputAutoFocus
+          selectall='yes'
+          disabled={isDefaultTheme}
+          autofocustrigger={autofocustrigger}
+        />
+      </FormItem>
+      <FormItem
+        {...formItemLayout}
+        label={t('themeConfig')}
+        rules={[{
+          max: 1000, message: '1000 chars max'
+        }, {
+          required: true, message: 'theme Config required'
+        }]}
+      >
+        <FormItem noStyle name='themeText'>
+          <TextArea rows={5} disabled={isDefaultTheme} />
+        </FormItem>
+        <p>Tip: <b>main</b> better be the same as <b>terminal:background</b></p>
+        <div className='pd1t'>
+          <Upload
+            beforeUpload={beforeUpload}
+            fileList={[]}
+            className='mg1b'
+          >
+            <Button
+              type='ghost'
+              disabled={isDefaultTheme}
+            >
+              {e('importFromFile')}
+            </Button>
+          </Upload>
+        </div>
+      </FormItem>
+      {
+        isDefaultTheme
+          ? null
+          : (
+            <FormItem {...tailFormItemLayout}>
+              <p>
+                <Button
+                  type='primary'
+                  htmlType='submit'
+                  className='mg1r mg1b'
+                >{t('saveAndApply')}</Button>
+                <Button
+                  type='ghost'
+                  className='mg1r mg1b'
+                  onClick={saveOnly}
+                >{e('save')}</Button>
+              </p>
+            </FormItem>
+          )
+      }
+    </Form>
+  )
 }
-
-export default ThemeForm

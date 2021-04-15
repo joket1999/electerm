@@ -1,17 +1,31 @@
+@require '../../css/includes/theme-default'
 .context-menu
   position: absolute
   width 170px
-  background #fff
-  box-shadow 0px 0px 3px 3px rgba(0,0,0,0.05)
-  border 1px solid #eee
+  background main
+  box-shadow 0px 0px 3px 3px alpha(main, .35)
+  // border 1px solid #222
   padding 10px 0
-  z-index 410
+  z-index 999
+  -webkit-app-region no-drag
+  &.scroll
+    .context-menu-inner
+      overflow-x hidden
+      overflow-y scroll
 .context-item
+  -webkit-app-region no-drag
   position relative
-  &.disabled
-    color #aaa
+  color #bbb
   &:hover
-    background #f2f2f2
+    background #000
+    color #eee
+  &.disabled
+    color #777
+    &:hover
+      color #777
+      background #333
+      cursor not-allowed
+
 .context-sub-text
   position absolute
   right 16px

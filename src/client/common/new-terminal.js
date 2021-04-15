@@ -2,13 +2,13 @@
  * output default new terminal data obj
  */
 
-import {generate} from 'shortid'
+import { nanoid as generate } from 'nanoid/non-secure'
 
-const {prefix} = window
+const { prefix } = window
 const e = prefix('control')
 
-export default () => ({
+export default (len) => ({
   id: generate(),
-  status: defaultStatus,
-  title: e('newTerminal')
+  status: 'processing',
+  title: e('newTerminal') + (len ? `(${len})` : '')
 })

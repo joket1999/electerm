@@ -2,16 +2,18 @@
  * theme control
  */
 
-import {defaultTheme} from './constants'
-import download from './download'
+import { defaultTheme } from '../common/constants'
+import download from '../common/download'
 import copy from 'json-deep-copy'
-const {prefix} = window
+import { findOne } from './db'
+const { prefix } = window
 const t = prefix('terminalThemes')
+const terminalPrefix = 'terminal:'
 
 /**
  * build default themes
  */
-const buildDefaultThemes = () => {
+export const buildDefaultThemes = () => {
   return {
     [defaultTheme.id]: defaultTheme
   }
@@ -20,9 +22,9 @@ const buildDefaultThemes = () => {
 /**
  * build new theme
  */
-const buildNewTheme = () => {
+export const buildNewTheme = (theme = defaultTheme) => {
   return Object.assign(
-    copy(defaultTheme),
+    copy(theme),
     {
       id: '',
       name: t('newTheme')
@@ -36,17 +38,22 @@ const buildNewTheme = () => {
  * @param {boolean} withName
  * @return {string}
  */
-const convertThemeToText = (themeObj = {}, withName = false) => {
-  let theme = themeObj || {}
-  let {themeConfig = {}, name} = theme
-  if (withName) {
-    themeConfig.themeName = name
-  }
-  return Object.keys(themeConfig).reduce((prev, key) => {
+export const convertThemeToText = (themeObj = {}, withName = false) => {
+  const theme = themeObj || {}
+  const { themeConfig = {}, name, uiThemeConfig = {} } = theme
+  const begin = withName
+    ? `themeName=${name}\n`
+    : ''
+  const res = Object.keys(uiThemeConfig).reduce((prev, key) => {
     return prev +
       (prev ? '\n' : '') +
+      key + '=' + uiThemeConfig[key]
+  }, begin)
+  return Object.keys(themeConfig).reduce((prev, key) => {
+    return prev +
+      (prev ? '\n' : '') + terminalPrefix +
       key + '=' + themeConfig[key]
-  }, '')
+  }, res)
 }
 
 /**
@@ -54,66 +61,29 @@ const convertThemeToText = (themeObj = {}, withName = false) => {
  * @param {string} themeTxt
  * @return {object}
  */
-const convertTheme = (themeTxt) => {
-  let keys = [
-    ...Object.keys(defaultTheme.themeConfig),
-    'themeName'
-  ]
+export const convertTheme = (themeTxt) => {
   return themeTxt.split('\n').reduce((prev, line) => {
     let [key = '', value = ''] = line.split('=')
     key = key.trim()
     value = value.trim()
-    if (!key || !value || !keys.includes(key)) {
+    if (!key || !value) {
       return prev
     }
-    if (key === 'themeName' ) {
+    if (key === 'themeName') {
       prev.name = value.slice(0, 50)
     } else {
-      prev.themeConfig[key] = value
+      const isTerminal = key.startsWith(terminalPrefix)
+      key = key.replace(terminalPrefix, '')
+      if (isTerminal) {
+        prev.themeConfig[key] = value
+      } else {
+        prev.uiThemeConfig[key] = value
+      }
     }
     return prev
   }, {
-    name: 'unnamed theme',
-    themeConfig: {}
-  })
-}
-
-/**
- * get current
- * @return {object}
- */
-const getCurrentTheme = () => {
-  const ls = window.getGlobal('ls')
-  let config = window.getGlobal('_config')
-  let themes = copy(ls.get('themes') || buildDefaultThemes())
-  let themeId = config.theme || defaultTheme.id
-  let themeObj = themes[themeId] || defaultTheme
-  return themeObj
-}
-
-/**
- * get theme list from ls
- * @return {array}
- */
-const getThemes = () => {
-  const ls = window.getGlobal('ls')
-  let themes = copy(ls.get('themes') || buildDefaultThemes())
-  return Object.keys(themes).reduce((prev, k) => {
-    return [
-      ...prev,
-      themes[k]
-    ]
-  }, [])
-}
-
-/**
- * set theme
- * @param {string} themeId
- */
-const setTheme = (themeId) => {
-  const saveUserConfig = window.getGlobal('saveUserConfig')
-  saveUserConfig({
-    theme: themeId
+    themeConfig: {},
+    uiThemeConfig: {}
   })
 }
 
@@ -122,83 +92,28 @@ const setTheme = (themeId) => {
  * @param {object} themeConfig
  * @return {array} extra keys
  */
-const verifyTheme = (themeConfig) => {
-  let keysRight = Object.keys(defaultTheme.themeConfig)
-  let keys = Object.keys(themeConfig)
-  let extraKeys = keys.filter(k => !keysRight.includes(k))
+export const verifyTheme = (themeConfig) => {
+  const keysRight = Object.keys(defaultTheme.themeConfig)
+  const keys = Object.keys(themeConfig)
+  const extraKeys = keys.filter(k => !keysRight.includes(k))
   return extraKeys
-}
-
-/**
- * add theme
- * @param {object} themeObj
- */
-const addTheme = (themeObj) => {
-  const ls = window.getGlobal('ls')
-  let themes = copy(ls.get('themes') || buildDefaultThemes())
-  themes[themeObj.id] = themeObj
-  ls.set('themes', themes)
 }
 
 /**
  * export theme as txt
  * @param {string} themeId
  */
-const exportTheme = (themeId) => {
-  const ls = window.getGlobal('ls')
-  let themes = copy(ls.get('themes') || buildDefaultThemes())
-  let theme = themes[themeId]
-  let text = convertThemeToText(theme, true)
+export const exportTheme = async (themeId) => {
+  const themes = await findOne('terminalThemes', themeId) || buildDefaultThemes()
+  const theme = themes[themeId] || themes
+  if (!theme) {
+    log.error('export error', themeId)
+    return
+  }
+
+  const text = convertThemeToText(theme, true)
   download(
     `${theme.name}.txt`,
     text
   )
-}
-
-/**
- * delete theme
- * @param {string} themeId
- */
-const delTheme = (themeId) => {
-  if (themeId === defaultTheme.id) {
-    throw new Error('default theme can not be deleted')
-  }
-  const ls = window.getGlobal('ls')
-  let themes = copy(ls.get('themes') || buildDefaultThemes())
-  delete themes[themeId]
-  ls.set('themes', themes)
-  let config = window.getGlobal('_config')
-  if (config.theme === themeId) {
-    const saveUserConfig = window.getGlobal('saveUserConfig')
-    saveUserConfig({
-      theme: defaultTheme.id
-    })
-  }
-}
-
-/**
- * update theme
- * @param {string} themeId
- * @param {object} update
- */
-const updateTheme = (themeId, update) => {
-  const ls = window.getGlobal('ls')
-  let themes = copy(ls.get('themes') || buildDefaultThemes())
-  Object.assign(themes[themeId], update)
-  ls.set('themes', themes)
-}
-
-export {
-  getCurrentTheme,
-  setTheme,
-  verifyTheme,
-  convertTheme,
-  exportTheme,
-  updateTheme,
-  defaultTheme,
-  getThemes,
-  convertThemeToText,
-  addTheme,
-  delTheme,
-  buildNewTheme
 }

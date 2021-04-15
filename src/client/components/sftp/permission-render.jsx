@@ -2,28 +2,28 @@
  * file permission render
  */
 
-import {Button} from 'antd'
+import { Button } from 'antd'
 import _ from 'lodash'
 
-const {prefix} = window
+const { prefix } = window
 const e = prefix('permission')
-const {Group} = Button
+const { Group } = Button
 
 export default (perm, _onClick) => {
-  let {
+  const {
     name,
     permission
   } = perm
-  let onClick = _.isFunction(_onClick)
+  const onClick = _.isFunction(_onClick)
     ? _onClick
     : _.noop
   return (
-    <div key={name + 'pr'} className="pd1b">
-      <span className="iblock mg1r">{e(name)}</span>
-      <Group className="iblock">
+    <div key={name + 'pr'} className='pd1b'>
+      <span className='iblock mg1r'>{e(name)}</span>
+      <Group className='iblock'>
         {
           Object.keys(permission).map(n => {
-            let type = permission[n]
+            const type = permission[n]
               ? 'primary'
               : 'ghost'
             return (

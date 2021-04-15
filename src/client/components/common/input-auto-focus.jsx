@@ -2,18 +2,17 @@
  * input with auto focus
  */
 
-import {Input} from 'antd'
+import { Input } from 'antd'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import _ from 'lodash'
 
 export default class InputAutoFocus extends React.PureComponent {
-
-  componentDidMount() {
+  componentDidMount () {
     this.timer = setTimeout(this.doFocus, 50)
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate (prevProps) {
     if (!prevProps.selectall) {
       return
     }
@@ -22,40 +21,42 @@ export default class InputAutoFocus extends React.PureComponent {
     }
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     clearTimeout(this.timer)
   }
 
   doFocus = () => {
-    let dom = this.getDom()
+    const dom = this.getDom()
     if (dom && dom.focus) {
-      let {value, selectall = false} = this.props
-      let index = _.findLastIndex(value, v => v === '.')
-      let hasExt = index > 0
-      if (value && !selectall && hasExt ) {
+      const { value, selectall = false } = this.props
+      const index = _.findLastIndex(value, v => v === '.')
+      const hasExt = index > 0
+      if (value && !selectall && hasExt) {
         dom.focus()
         dom.setSelectionRange(0, index)
-      }
-      else {
+      } else {
         dom.select()
       }
     }
   }
 
-  getDom() {
-    let root = ReactDOM.findDOMNode(this)
-    let dom = root.tagName === 'INPUT'
+  getDom () {
+    const root = ReactDOM.findDOMNode(this)
+    const dom = root.tagName === 'INPUT'
       ? root
       : root.querySelector('input')
     return dom
   }
 
-  render() {
+  render () {
+    const { type, ...rest } = this.props
+    const Dom = type === 'password'
+      ? Input.Password
+      : Input
     return (
-      <Input
-        {...this.props}
+      <Dom
+        {...rest}
       />
     )
   }
-
 }

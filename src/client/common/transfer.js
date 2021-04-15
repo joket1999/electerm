@@ -2,25 +2,26 @@
  * transfer through ws
  */
 
-import {generate} from 'shortid'
+import { nanoid as generate } from 'nanoid/non-secure'
 import initWs from './ws'
 
-const keys = window.getGlobal('transferKeys')
+const keys = window.pre.transferKeys
 
 class Transfer {
-
-  constructor() {}
-
   async init ({
     onData,
     onEnd,
     onError,
     ...rest
   }) {
-    let id = generate()
+    const id = generate()
     this.id = id
-    let th = this
-    let ws = await initWs('transfer', id)
+    const th = this
+    const {
+      sessionId,
+      sftpId
+    } = rest
+    const ws = await initWs('transfer', id, sessionId, sftpId)
     ws.s({
       action: 'transfer-new',
       ...rest,
@@ -32,6 +33,8 @@ class Transfer {
           action: 'transfer-func',
           id: th.id,
           func,
+          sessionId,
+          sftpId,
           args
         })
         if (func === 'destroy') {
@@ -40,9 +43,9 @@ class Transfer {
       }
     })
 
-    let did = 'transfer:data:' + id
+    const did = 'transfer:data:' + id
     this.onData = (evt) => {
-      let arg = JSON.parse(evt.data)
+      const arg = JSON.parse(evt.data)
       if (did === arg.id) {
         onData(arg.data)
       }
@@ -52,22 +55,20 @@ class Transfer {
       onEnd(arg)
     }, 'transfer:end:' + id)
     ws.once((arg) => {
-      console.log('sftp transfer error')
-      console.log(arg.error.stack)
+      log.debug('sftp transfer error')
+      log.debug(arg.error.stack)
       onError(new Error(arg.error.message))
     }, 'transfer:err:' + id)
-
   }
 
-  onDestroy(ws) {
+  onDestroy (ws) {
     ws.removeEventListener('message', this.onData)
     ws.close()
   }
-
 }
 
 export default async (props) => {
-  let transfer = new Transfer()
+  const transfer = new Transfer()
   await transfer.init(props)
   return transfer
 }

@@ -1,49 +1,54 @@
 // the final fetch wrapper
 import _ from 'lodash'
-import {notification} from 'antd'
+import { notification } from 'antd'
 
 const jsonHeader = {
-  'Accept': 'application/json',
-  'Content-Type': 'application/json'
+  Accept: 'application/json',
+  'Content-Type': 'application/json',
+  token: window._config.tokenElecterm
 }
 
-function parseResponse(response) {
-  let contentType = response.headers.get('content-type') || ''
-  let isJsonResult = contentType.toLowerCase().includes('application/json')
+function parseResponse (response) {
+  const contentType = response.headers.get('content-type') || ''
+  const isJsonResult = contentType.toLowerCase().includes('application/json')
   return isJsonResult ? response.json() : response.text()
 }
 
-export async function handleErr(res) {
-  console.log(res)
+export async function handleErr (res) {
+  log.debug(res)
   let text = res.message || res.statusText
-  try {
-    text = _.isFunction(res.text)
-      ? await res.text()
-      : await res.json()
-  } catch(e) {
-    console.log(e)
-    console.log('res.text fails')
+  if (!_.isString(text)) {
+    try {
+      text = _.isFunction(res.text)
+        ? await res.text()
+        : _.isFunction(res.json) ? await res.json() : ''
+    } catch (e) {
+      log.error('fetch response parse fails', e)
+    }
   }
-  console.log(text, 'err info')
+  log.debug(text, 'fetch err info')
   notification.error({
     message: 'error',
-    description: text,
+    description: (
+      <div className='common-err'>
+        {text}
+      </div>
+    ),
     duration: 55
   })
 }
 
 export default class Fetch {
-
-  static get(url, data, options) {
+  static get (url, data, options) {
     return Fetch.connect(url, 'get', null, options)
   }
 
-  static post(url, data, options) {
+  static post (url, data, options) {
     return Fetch.connect(url, 'post', data, options)
   }
 
-  static connect(url, method, data, options = {}) {
-    let body = {
+  static connect (url, method, data, options = {}) {
+    const body = {
       method,
       body: data
         ? JSON.stringify(data)
@@ -52,7 +57,7 @@ export default class Fetch {
       timeout: 180000,
       ...options
     }
-    return fetch(url, body)
+    return window.fetch(url, body)
       .then(res => {
         if (res.status > 304) {
           throw res
@@ -62,4 +67,3 @@ export default class Fetch {
       .then(options.handleResponse || parseResponse, options.handleErr || handleErr)
   }
 }
-

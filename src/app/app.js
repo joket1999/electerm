@@ -15,6 +15,7 @@ const {
 } = require('./lib/window-control')
 const { onClose } = require('./lib/on-close')
 const initIpc = require('./lib/ipc')
+const { getDbConfig } = require('./lib/get-config')
 
 app.setName(packInfo.name)
 global.et = {
@@ -32,61 +33,54 @@ if (process.platform === 'linux') {
 }
 
 async function createWindow () {
+  const userConfig = await getDbConfig() || {}
   const { width, height } = await getWindowSize()
+  const { useSystemTitleBar } = userConfig
   // Create the browser window.
+  console.log('useSystemTitleBar', useSystemTitleBar)
   const isTest = process.env.NODE_TEST === 'yes'
+
   global.win = new BrowserWindow({
     width,
     height,
     fullscreenable: true,
     // fullscreen: true,
     title: packInfo.name,
-    frame: false,
-    transparent: true,
-    backgroundColor: '#ff333333',
+    frame: useSystemTitleBar,
+    transparent: !useSystemTitleBar,
+    backgroundColor: '#333333FF',
     webPreferences: {
+      contextIsolation: false,
       nodeIntegration: isTest,
       enableRemoteModule: isTest,
       preload: resolve(__dirname, './preload/preload.js')
     },
-    titleBarStyle: 'customButtonsOnHover',
+    titleBarStyle: useSystemTitleBar ? 'default' : 'customButtonsOnHover',
     icon: iconPath
   })
 
-  // global.et.exitStatus = process.argv.includes('--no-session-restore')
-  //   ? 'ok'
-  //   : await getExitStatus()
-
   initIpc()
 
-  // global.et.timer = setTimeout(() => {
-  //   dbAction('data', 'update', {
-  //     _id: 'exitStatus'
-  //   }, {
-  //     value: 'unknown'
-  //   }, {
-  //     upsert: true
-  //   })
-  // }, 100)
-
-  let opts = require('url').format({
-    protocol: 'file',
-    slashes: true,
-    pathname: resolve(__dirname, 'assets', 'index.html')
-  })
+  let opts
 
   if (isDev) {
     const { devPort = 5570 } = process.env
     opts = `http://127.0.0.1:${devPort}`
+  } else {
+    opts = require('url').format({
+      protocol: 'file',
+      slashes: true,
+      pathname: resolve(__dirname, 'assets', 'index.html')
+    })
   }
 
   global.win.loadURL(opts)
 
-  if (isDev) {
-    global.win.webContents.once('dom-ready', () => {
-      global.win.webContents.openDevTools()
-    })
-  }
+  // if (isDev) {
+  //   global.win.webContents.once('dom-ready', () => {
+  //     global.win.webContents.openDevTools()
+  //   })
+  // }
 
   global.win.on('unmaximize', () => {
     const { width, height } = global.win.getBounds()

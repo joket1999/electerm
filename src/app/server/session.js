@@ -58,7 +58,7 @@ class Terminal {
     this.initOptions = initOptions
     if (initOptions.saveTerminalLogToFile) {
       this.sessionLogger = new SessionLog({
-        fileName: createLogFileName(initOptions.tabId)
+        fileName: createLogFileName(initOptions.logName)
       })
     }
     if (ws) {
@@ -180,6 +180,9 @@ class Terminal {
       conn,
       shellOpts
     } = connInst
+    if (initOptions.enableSsh === false) {
+      return true
+    }
     return new Promise((resolve, reject) => {
       conn.shell(
         this.getShellWindow(),
@@ -362,6 +365,15 @@ class Terminal {
           .on('ready', () => {
             if (isTest) {
               conn.end()
+              return resolve(true)
+            } else if (initOptions.enableSsh === false) {
+              global.sessions[initOptions.sessionId] = {
+                conn,
+                id: initOptions.sessionId,
+                shellOpts,
+                sftps: {},
+                terminals: {}
+              }
               return resolve(true)
             }
             conn.shell(

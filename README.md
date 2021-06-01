@@ -22,16 +22,17 @@ Terminal/ssh/sftp client(linux, mac, win) based on electron/ssh2/node-pty/xterm/
 
 - [https://electerm.github.io/electerm](https://electerm.github.io/electerm)
 - From release: [https://github.com/electerm/electerm/releases](https://github.com/electerm/electerm/releases)
-- For some linux OS, rpm pack may not work, you can try the `.snap` release.
 - For Mac user: `brew install --cask electerm`
 - With snap: `sudo snap install electerm`
-- For Deepin Linux user, you can find it from App store.
+- For some Linux distribution, you can find it from OS default App store(Ubuntu, Deepin, Mint...).
+- For some linux OS, the `rpm`, `deb`, or `snap` release may not work, you can try the `tar.gz` release.
 - For Windows users, command-line installer [scoop](https://github.com/lukesampson/scoop) is recommended:
 
 ```powershell
 scoop bucket add dorado https://github.com/chawyehsu/dorado
 scoop install dorado/electerm
 ```
+
 - Install from npm
 
 ```bash
@@ -47,6 +48,7 @@ npm i -g electerm
 - Auto upgrade: When new version released, you will get upgrade notification after you start electerm again, then you click the upgrade button to upgrade.
 - Download: Just download the latest edition, reinstall.
 - Npm: If you install from npm, just run `npm i -g electerm` again.
+- If use Snap or some other distribution systems, these systems may provide upgrade.
 
 ## Features
 
